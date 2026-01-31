@@ -2,7 +2,8 @@
 
 public static class GuiLib
 {
-    public static int ShowChoices(string title, string message, string button1Text, string button2Text, string button3Text)
+    public static int ShowChoices(string title, string message, string button1Text, string button2Text,
+        string button3Text)
     {
         var result = -1;
 
@@ -83,7 +84,7 @@ public static class GuiLib
 
         return result;
     }
-    
+
     public static int ShowChoices(string title, string message, string button1Text, string button2Text)
     {
         var result = -1;
@@ -150,10 +151,10 @@ public static class GuiLib
 
         return result;
     }
-    
+
     public static string ShowInputDialog(string title, string promptText)
     {
-        Form prompt = new Form()
+        var prompt = new Form
         {
             Width = 400,
             Height = 150,
@@ -163,38 +164,38 @@ public static class GuiLib
             MaximizeBox = false,
             MinimizeBox = false
         };
-    
-        Label textLabel = new Label() 
-        { 
-            Left = 20, 
-            Top = 20, 
+
+        var textLabel = new Label
+        {
+            Left = 20,
+            Top = 20,
             Text = promptText,
             AutoSize = true
         };
-    
-        TextBox textBox = new TextBox() 
-        { 
-            Left = 20, 
-            Top = 50, 
-            Width = 340 
+
+        var textBox = new TextBox
+        {
+            Left = 20,
+            Top = 50,
+            Width = 340
         };
-    
-        Button confirmation = new Button() 
-        { 
-            Text = "OK", 
-            Left = 280, 
-            Width = 80, 
+
+        var confirmation = new Button
+        {
+            Text = "OK",
+            Left = 280,
+            Width = 80,
             Top = 80,
-            DialogResult = DialogResult.OK 
+            DialogResult = DialogResult.OK
         };
-    
+
         confirmation.Click += (sender, e) => { prompt.Close(); };
-    
+
         prompt.Controls.Add(textLabel);
         prompt.Controls.Add(textBox);
         prompt.Controls.Add(confirmation);
         prompt.AcceptButton = confirmation;
-    
+
         return prompt.ShowDialog() == DialogResult.OK ? textBox.Text : string.Empty;
     }
 }
