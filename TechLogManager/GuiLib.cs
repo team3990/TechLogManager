@@ -1,7 +1,4 @@
-﻿using System.Drawing;
-using System.Windows.Forms;
-
-namespace TechLogManager;
+﻿namespace TechLogManager;
 
 public static class GuiLib
 {
