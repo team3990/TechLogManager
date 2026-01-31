@@ -6,21 +6,31 @@ public static class Gui
 
     public static string AskTeamNumber()
     {
-        return GuiLib.ShowInputDialog(Title, "Enter team number");
+        string logo1Path = "Images/team9606_logo.png";  
+        string logo2Path = "Images/team3990_logo.png";  
+
+        return GuiLib.ShowLogoChoice(
+            Title, 
+            "Select Your Team", 
+            logo1Path, 
+            logo2Path, 
+            "9606", 
+            "3990"
+        );
     }
 
     public static int AskAction()
     {
-        return GuiLib.ShowChoices(Title, "what to do", "dl and del", "dl", "del");
+        return GuiLib.ShowChoices(Title, "Choose your operation", "download&delete", "download", "delete");
     }
 
     public static bool AskCommit()
     {
-        return GuiLib.ShowChoices(Title, "commit ?", "yes", "no") == 0;
+        return GuiLib.ShowChoices(Title, "Do you want to commit?", "yes", "no") == 0;
     }
 
     public static bool AskPush()
     {
-        return GuiLib.ShowChoices(Title, "push ?", "yes", "no") == 0;
+        return GuiLib.ShowChoices(Title, "Do you want to push?", "yes", "no") == 0;
     }
 }

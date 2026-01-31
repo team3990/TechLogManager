@@ -7,7 +7,6 @@ public static class GuiLib
     {
         var result = -1;
 
-        // Create the form
         var dialog = new Form
         {
             Text = title,
@@ -19,7 +18,6 @@ public static class GuiLib
             MinimizeBox = false
         };
 
-        // Add label for message
         var label = new Label
         {
             Text = message,
@@ -30,7 +28,6 @@ public static class GuiLib
             TextAlign = ContentAlignment.MiddleCenter
         };
 
-        // Add buttons
         var button1 = new Button
         {
             Text = button1Text,
@@ -67,19 +64,18 @@ public static class GuiLib
             Width = 100,
             DialogResult = DialogResult.Abort
         };
+
         button3.Click += (sender, e) =>
         {
             result = 2;
             dialog.Close();
         };
 
-        // Add controls to form
         dialog.Controls.Add(label);
         dialog.Controls.Add(button1);
         dialog.Controls.Add(button2);
         dialog.Controls.Add(button3);
 
-        // Show dialog
         dialog.ShowDialog();
 
         return result;
@@ -89,7 +85,6 @@ public static class GuiLib
     {
         var result = -1;
 
-        // Create the form
         var dialog = new Form
         {
             Text = title,
@@ -101,18 +96,16 @@ public static class GuiLib
             MinimizeBox = false
         };
 
-        // Add label for message
         var label = new Label
         {
             Text = message,
             Left = 20,
             Top = 20,
-            Width = 120,
+            Width = 260,
             Height = 60,
             TextAlign = ContentAlignment.MiddleCenter
         };
 
-        // Add buttons
         var button1 = new Button
         {
             Text = button1Text,
@@ -130,7 +123,7 @@ public static class GuiLib
         var button2 = new Button
         {
             Text = button2Text,
-            Left = 140,
+            Left = 160,
             Top = 100,
             Width = 100,
             DialogResult = DialogResult.Cancel
@@ -141,12 +134,11 @@ public static class GuiLib
             dialog.Close();
         };
 
-        // Add controls to form
         dialog.Controls.Add(label);
         dialog.Controls.Add(button1);
         dialog.Controls.Add(button2);
 
-        // Show dialog
+    
         dialog.ShowDialog();
 
         return result;
@@ -197,5 +189,136 @@ public static class GuiLib
         prompt.AcceptButton = confirmation;
 
         return prompt.ShowDialog() == DialogResult.OK ? textBox.Text : string.Empty;
+    }
+
+    public static string ShowLogoChoice(string title, string message, string logo1Path, string logo2Path, string team1Number, string team2Number)
+    {
+        string result = string.Empty;
+
+        var dialog = new Form
+        {
+            Text = title,
+            Width = 500,
+            Height = 350,
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            StartPosition = FormStartPosition.CenterScreen,
+            MaximizeBox = false,
+            MinimizeBox = false,
+            BackColor = Color.White
+        };
+
+        var label = new Label
+        {
+            Text = message,
+            Left = 20,
+            Top = 20,
+            Width = 460,
+            Height = 40,
+            TextAlign = ContentAlignment.MiddleCenter,
+            Font = new Font("Arial", 12, FontStyle.Bold)
+        };
+
+        var button1 = new Button
+        {
+            Left = 50,
+            Top = 80,
+            Width = 150,
+            Height = 150,
+            BackColor = Color.White,
+            FlatStyle = FlatStyle.Flat
+        };
+        
+        try
+        {
+            if (File.Exists(logo1Path))
+            {
+                button1.BackgroundImage = Image.FromFile(logo1Path);
+                button1.BackgroundImageLayout = ImageLayout.Zoom;
+            }
+            else
+            {
+                button1.Text = team1Number;
+                button1.Font = new Font("Arial", 16, FontStyle.Bold);
+            }
+        }
+        catch
+        {
+            button1.Text = team1Number;
+            button1.Font = new Font("Arial", 16, FontStyle.Bold);
+        }
+
+        button1.Click += (sender, e) =>
+        {
+            result = team1Number;
+            dialog.Close();
+        };
+
+        // Create button 2 with logo
+        var button2 = new Button
+        {
+            Left = 280,
+            Top = 80,
+            Width = 150,
+            Height = 150,
+            BackColor = Color.White,
+            FlatStyle = FlatStyle.Flat
+        };
+
+        try
+        {
+            if (File.Exists(logo2Path))
+            {
+                button2.BackgroundImage = Image.FromFile(logo2Path);
+                button2.BackgroundImageLayout = ImageLayout.Zoom;
+            }
+            else
+            {
+                button2.Text = team2Number;
+                button2.Font = new Font("Arial", 16, FontStyle.Bold);
+            }
+        }
+        catch
+        {
+            button2.Text = team2Number;
+            button2.Font = new Font("Arial", 16, FontStyle.Bold);
+        }
+
+        button2.Click += (sender, e) =>
+        {
+            result = team2Number;
+            dialog.Close();
+        };
+
+        var label1 = new Label
+        {
+            Text = $"Team {team1Number}",
+            Left = 50,
+            Top = 240,
+            Width = 150,
+            Height = 30,
+            TextAlign = ContentAlignment.MiddleCenter,
+            Font = new Font("Arial", 10, FontStyle.Bold)
+        };
+
+        var label2 = new Label
+        {
+            Text = $"Team {team2Number}",
+            Left = 280,
+            Top = 240,
+            Width = 150,
+            Height = 30,
+            TextAlign = ContentAlignment.MiddleCenter,
+            Font = new Font("Arial", 10, FontStyle.Bold)
+        };
+
+        dialog.Controls.Add(label);
+        dialog.Controls.Add(button1);
+        dialog.Controls.Add(button2);
+        dialog.Controls.Add(label1);
+        dialog.Controls.Add(label2);
+
+        dialog.ShowDialog();
+
+        return result;
     }
 }
