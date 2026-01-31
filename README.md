@@ -12,4 +12,4 @@ Supported logs :
 
 - [x] wpilog
 - [ ] hoot
-- [ ] limelight rewind
+- [x] limelight rewind

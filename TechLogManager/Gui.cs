@@ -2,35 +2,35 @@
 
 public static class Gui
 {
-    private const string Title = "Tech log manager";
-
     public static string AskTeamNumber()
     {
-        string logo1Path = "Images/team9606_logo.png";  
-        string logo2Path = "Images/team3990_logo.png";  
-
         return GuiLib.ShowLogoChoice(
-            Title, 
-            "Select Your Team", 
-            logo1Path, 
-            logo2Path, 
-            "9606", 
+            "Team number",
+            "Select Your Team",
+            "TechLogManager/img/team9606_logo.png",
+            "TechLogManager/img/team3990_logo.png",
+            "9606",
             "3990"
         );
     }
 
-    public static int AskAction()
+    public static int AskActionDlDel(string title)
     {
-        return GuiLib.ShowChoices(Title, "Choose your operation", "download&delete", "download", "delete");
+        return GuiLib.ShowChoices(title, "Choose your operation", "dl and del", "download", "delete");
+    }
+
+    public static int AskActionLlWpi()
+    {
+        return GuiLib.ShowChoices("What logs", "What to download", "ll and rio", "limelight", "roborio");
     }
 
     public static bool AskCommit()
     {
-        return GuiLib.ShowChoices(Title, "Do you want to commit?", "yes", "no") == 0;
+        return GuiLib.ShowChoices("Commit choice", "Do you want to commit?", "yes", "no") == 0;
     }
 
     public static bool AskPush()
     {
-        return GuiLib.ShowChoices(Title, "Do you want to push?", "yes", "no") == 0;
+        return GuiLib.ShowChoices("Push choice", "Do you want to push?", "yes", "no") == 0;
     }
 }

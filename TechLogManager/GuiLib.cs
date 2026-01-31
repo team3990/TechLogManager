@@ -36,7 +36,7 @@ public static class GuiLib
             Width = 100,
             DialogResult = DialogResult.OK
         };
-        button1.Click += (sender, e) =>
+        button1.Click += (_, _) =>
         {
             result = 0;
             dialog.Close();
@@ -50,7 +50,7 @@ public static class GuiLib
             Width = 100,
             DialogResult = DialogResult.Cancel
         };
-        button2.Click += (sender, e) =>
+        button2.Click += (_, _) =>
         {
             result = 1;
             dialog.Close();
@@ -65,7 +65,7 @@ public static class GuiLib
             DialogResult = DialogResult.Abort
         };
 
-        button3.Click += (sender, e) =>
+        button3.Click += (_, _) =>
         {
             result = 2;
             dialog.Close();
@@ -114,7 +114,7 @@ public static class GuiLib
             Width = 100,
             DialogResult = DialogResult.OK
         };
-        button1.Click += (sender, e) =>
+        button1.Click += (_, _) =>
         {
             result = 0;
             dialog.Close();
@@ -128,7 +128,7 @@ public static class GuiLib
             Width = 100,
             DialogResult = DialogResult.Cancel
         };
-        button2.Click += (sender, e) =>
+        button2.Click += (_, _) =>
         {
             result = 1;
             dialog.Close();
@@ -138,7 +138,6 @@ public static class GuiLib
         dialog.Controls.Add(button1);
         dialog.Controls.Add(button2);
 
-    
         dialog.ShowDialog();
 
         return result;
@@ -181,7 +180,7 @@ public static class GuiLib
             DialogResult = DialogResult.OK
         };
 
-        confirmation.Click += (sender, e) => { prompt.Close(); };
+        confirmation.Click += (_, _) => { prompt.Close(); };
 
         prompt.Controls.Add(textLabel);
         prompt.Controls.Add(textBox);
@@ -191,9 +190,10 @@ public static class GuiLib
         return prompt.ShowDialog() == DialogResult.OK ? textBox.Text : string.Empty;
     }
 
-    public static string ShowLogoChoice(string title, string message, string logo1Path, string logo2Path, string team1Number, string team2Number)
+    public static string ShowLogoChoice(string title, string message, string logo1Path, string logo2Path,
+        string team1Number, string team2Number)
     {
-        string result = string.Empty;
+        var result = string.Empty;
 
         var dialog = new Form
         {
@@ -227,7 +227,7 @@ public static class GuiLib
             BackColor = Color.White,
             FlatStyle = FlatStyle.Flat
         };
-        
+
         try
         {
             if (File.Exists(logo1Path))
@@ -247,7 +247,7 @@ public static class GuiLib
             button1.Font = new Font("Arial", 16, FontStyle.Bold);
         }
 
-        button1.Click += (sender, e) =>
+        button1.Click += (_, _) =>
         {
             result = team1Number;
             dialog.Close();
@@ -283,7 +283,7 @@ public static class GuiLib
             button2.Font = new Font("Arial", 16, FontStyle.Bold);
         }
 
-        button2.Click += (sender, e) =>
+        button2.Click += (_, _) =>
         {
             result = team2Number;
             dialog.Close();
