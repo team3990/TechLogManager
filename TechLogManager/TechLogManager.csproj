@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <LangVersion>14</LangVersion>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <UseWindowsForms>true</UseWindowsForms>
+    </PropertyGroup>
+
+    <Target Name="PostBuildCommands" AfterTargets="Build">
+        <!-- Copy dll from build output to project folder -->
+        <Exec Command="xcopy /Y &quot;$(TargetPath)&quot; &quot;$(ProjectDir)&quot;"/>
+    </Target>
+</Project>
