@@ -7,7 +7,7 @@ function LimelightMain
     param($teamNumber, $whatAction)
 
     $limelightsString = ssh lvuser@roboRIO-${teamNumber}-FRC.local "cat /home/lvuser/limelights.json"
-    $limeligts = [TechLogManager.Json]::ParseJsonStringList($limelightsString)
+    $limeligts = [TechLogManager.Utils]::ParseJsonStringList($limelightsString)
     Write-Output "limelights :" $limelights
     for ($i = 0; $i -lt $limeligts.Count; $i++)
     {
