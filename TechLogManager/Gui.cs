@@ -19,9 +19,9 @@ public static class Gui
         return GuiLib.ShowChoices(title, "Choose your operation", "dl and del", "download", "delete");
     }
 
-    public static int AskActionLlWpi()
+    public static int[] AskActionWhatLogFormat()
     {
-        return GuiLib.ShowChoices("What logs", "What to download", "ll and rio", "limelight", "roborio");
+        return GuiLib.ShowCheckboxChoices("What logs", "What to download", "roborio", "limelight", "ctre", "dslog");
     }
 
     public static bool AskCommit()

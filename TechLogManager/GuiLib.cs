@@ -2,6 +2,155 @@
 
 public static class GuiLib
 {
+    public static int[] ShowCheckboxChoices(string title, string message, params string[] options)
+    {
+        const int checkboxHeight = 25;
+        const int checkboxSpacing = 5;
+        const int checkboxWidth = 260;
+        const int margin = 20;
+        const int buttonHeight = 30;
+        const int labelHeight = 60;
+
+        var totalCheckboxHeight = options.Length * checkboxHeight + (options.Length - 1) * checkboxSpacing;
+        var formHeight =
+            margin + labelHeight + margin + totalCheckboxHeight + margin + buttonHeight + margin +
+            40; // +40 for title bar
+
+        var dialog = new Form
+        {
+            Text = title,
+            Width = 300,
+            Height = formHeight,
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            StartPosition = FormStartPosition.CenterScreen,
+            MaximizeBox = false,
+            MinimizeBox = false
+        };
+
+        var label = new Label
+        {
+            Text = message,
+            Left = margin,
+            Top = margin,
+            Width = checkboxWidth,
+            Height = labelHeight,
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+
+        dialog.Controls.Add(label);
+
+        var checkboxes = new CheckBox[options.Length];
+        var currentTop = margin + labelHeight + margin;
+
+        for (var i = 0; i < options.Length; i++)
+        {
+            var checkbox = new CheckBox
+            {
+                Text = options[i],
+                Left = margin,
+                Top = currentTop,
+                Width = checkboxWidth,
+                Height = checkboxHeight
+            };
+
+            checkboxes[i] = checkbox;
+            dialog.Controls.Add(checkbox);
+            currentTop += checkboxHeight + checkboxSpacing;
+        }
+
+        int[]? result = null;
+
+        var okButton = new Button
+        {
+            Text = "OK",
+            Left = margin + (checkboxWidth - 100) / 2,
+            Top = currentTop + margin,
+            Width = 100,
+            Height = buttonHeight
+        };
+
+        okButton.Click += (_, _) =>
+        {
+            var selected = new List<int>();
+            for (var i = 0; i < checkboxes.Length; i++)
+                if (checkboxes[i].Checked)
+                    selected.Add(i);
+
+            result = selected.ToArray();
+            dialog.Close();
+        };
+
+        dialog.Controls.Add(okButton);
+        dialog.ShowDialog();
+
+        return result ?? [];
+    }
+
+    public static int ShowChoices(string title, string message, params string[] buttons)
+    {
+        var result = -1;
+
+        const int buttonHeight = 30;
+        const int buttonSpacing = 10;
+        const int buttonWidth = 260;
+        const int margin = 20;
+
+        var labelHeight = 60;
+        var totalButtonHeight = buttons.Length * buttonHeight + (buttons.Length - 1) * buttonSpacing;
+        var formHeight = margin + labelHeight + margin + totalButtonHeight + margin + 40; // +40 for title bar
+
+        var dialog = new Form
+        {
+            Text = title,
+            Width = 300,
+            Height = formHeight,
+            FormBorderStyle = FormBorderStyle.FixedDialog,
+            StartPosition = FormStartPosition.CenterScreen,
+            MaximizeBox = false,
+            MinimizeBox = false
+        };
+
+        var label = new Label
+        {
+            Text = message,
+            Left = margin,
+            Top = margin,
+            Width = buttonWidth,
+            Height = labelHeight,
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+
+        dialog.Controls.Add(label);
+
+        var currentTop = margin + labelHeight + margin;
+
+        for (var i = 0; i < buttons.Length; i++)
+        {
+            var buttonIndex = i;
+            var button = new Button
+            {
+                Text = buttons[i],
+                Left = margin,
+                Top = currentTop,
+                Width = buttonWidth,
+                Height = buttonHeight
+            };
+
+            button.Click += (_, _) =>
+            {
+                result = buttonIndex;
+                dialog.Close();
+            };
+
+            dialog.Controls.Add(button);
+            currentTop += buttonHeight + buttonSpacing;
+        }
+
+        dialog.ShowDialog();
+
+        return result;
+    }
+
     public static int ShowChoices(string title, string message, string button1Text, string button2Text,
         string button3Text)
     {
@@ -310,7 +459,7 @@ public static class GuiLib
             TextAlign = ContentAlignment.MiddleCenter,
             Font = new Font("Arial", 10, FontStyle.Bold)
         };
-        
+
         var textBox = new TextBox
         {
             Left = 50,
@@ -339,10 +488,7 @@ public static class GuiLib
 
         var dialogResult = dialog.ShowDialog();
 
-        if (dialogResult == DialogResult.OK)
-        {
-            result = textBox.Text;
-        }
+        if (dialogResult == DialogResult.OK) result = textBox.Text;
 
         return result;
     }

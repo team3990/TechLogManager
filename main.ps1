@@ -1,5 +1,6 @@
 # Imports
 Add-Type -Path ".\TechLogManager\TechLogManager.dll"
+. .\scripts\ctre.ps1
 . .\scripts\limelight.ps1
 . .\scripts\wpilog.ps1
 
@@ -14,50 +15,56 @@ if (([int]$teamNum) -lt 0 -or $teamNum.Length -gt 4)
     exit
 }
 
-$whatActionMain = [TechLogManager.Gui]::AskActionLlWpi()
-if ($whatActionMain -lt 0)
+$whatActionMain = [TechLogManager.Gui]::AskActionWhatLogFormat()
+if ($whatActionMain.Count -eq 0)
 {
     exit
 }
 
-switch ($whatActionMain)
+for ($i = 0; $i -lt $whatActionMain.Count; $i++)
 {
-    0
+    switch ($whatActionMain[$i])
     {
-        Write-Output "Choosed both"
-        $whatActionLimelight = [TechLogManager.Gui]::AskActionDlDel("Limelight")
-        if ($whatActionLimelight -lt 0)
+        0
+        {
+            Write-Output "Choosed wpilog"
+            $whatAction = [TechLogManager.Gui]::AskActionDlDel("Wpilog")
+            if ($whatAction -lt 0)
+            {
+                exit
+            }
+            WpilogMain $teamNum $whatAction
+        } 1
+        {
+            Write-Output "Choosed limelight"
+            $whatAction = [TechLogManager.Gui]::AskActionDlDel("Limelight")
+            if ($whatAction -lt 0)
+            {
+                exit
+            }
+            LimelightMain $teamNum $whatAction
+        } 2
+        {
+            Write-Output "Choosed ctre"
+            $whatAction = [TechLogManager.Gui]::AskActionDlDel("Ctre")
+            if ($whatAction -lt 0)
+            {
+                exit
+            }
+            CtreMain $teamNum $whatAction
+        } 3
+        {
+            Write-Output "Choosed dslog"
+            $whatAction = [TechLogManager.Gui]::AskActionDlDel("Driver station logs")
+            if ($whatAction -lt 0)
+            {
+                exit
+            }
+            DsMain $whatAction
+        } default
         {
             exit
         }
-        $whatActionWpilog = [TechLogManager.Gui]::AskActionDlDel("Wpilog")
-        if ($whatActionWpilog -lt 0)
-        {
-            exit
-        }
-        WpilogMain $teamNum $whatActionWpilog
-        LimelightMain $teamNum $whatActionLimelight
-    } 1
-    {
-        Write-Output "Choosed limelight"
-        $whatAction = [TechLogManager.Gui]::AskActionDlDel("Limelight")
-        if ($whatAction -lt 0)
-        {
-            exit
-        }
-        LimelightMain $teamNum $whatAction
-    } 2
-    {
-        Write-Output "Choosed wpilog"
-        $whatAction = [TechLogManager.Gui]::AskActionDlDel("Wpilog")
-        if ($whatAction -lt 0)
-        {
-            exit
-        }
-        WpilogMain $teamNum $whatAction
-    } default
-    {
-        exit
     }
 }
 
@@ -67,8 +74,7 @@ if ([TechlogManager.Gui]::AskCommit())
     git add .
     $commitDate = Get-Date -Format "yyyy-MM-dd HH:mm"
     git commit -m "Added logs for $commitDate"
-}
-else
+} else
 {
     exit
 }
