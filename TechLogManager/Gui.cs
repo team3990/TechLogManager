@@ -7,9 +7,9 @@ public static class Gui
         return GuiLib.ShowLogoChoice(
             "Team number",
             "Select Your Team",
-            "TechLogManager/img/team9606_logo.png",
+            "TechLogManager/img/team9406_logo.png",
             "TechLogManager/img/team3990_logo.png",
-            "9606",
+            "9406",
             "3990"
         );
     }

@@ -199,7 +199,7 @@ public static class GuiLib
         {
             Text = title,
             Width = 500,
-            Height = 350,
+            Height = 500,
             FormBorderStyle = FormBorderStyle.FixedDialog,
             StartPosition = FormStartPosition.CenterScreen,
             MaximizeBox = false,
@@ -224,7 +224,7 @@ public static class GuiLib
             Top = 80,
             Width = 150,
             Height = 150,
-            BackColor = Color.White,
+            BackColor = Color.Black,
             FlatStyle = FlatStyle.Flat
         };
 
@@ -260,7 +260,7 @@ public static class GuiLib
             Top = 80,
             Width = 150,
             Height = 150,
-            BackColor = Color.White,
+            BackColor = Color.Black,
             FlatStyle = FlatStyle.Flat
         };
 
@@ -310,14 +310,39 @@ public static class GuiLib
             TextAlign = ContentAlignment.MiddleCenter,
             Font = new Font("Arial", 10, FontStyle.Bold)
         };
+        
+        var textBox = new TextBox
+        {
+            Left = 50,
+            Top = 350,
+            Width = 100
+        };
+
+        var confirmation = new Button
+        {
+            Text = "OK",
+            Left = 200,
+            Width = 80,
+            Top = 350,
+            DialogResult = DialogResult.OK
+        };
+
+        confirmation.Click += (_, _) => { dialog.Close(); };
 
         dialog.Controls.Add(label);
         dialog.Controls.Add(button1);
         dialog.Controls.Add(button2);
         dialog.Controls.Add(label1);
         dialog.Controls.Add(label2);
+        dialog.Controls.Add(textBox);
+        dialog.Controls.Add(confirmation);
 
-        dialog.ShowDialog();
+        var dialogResult = dialog.ShowDialog();
+
+        if (dialogResult == DialogResult.OK)
+        {
+            result = textBox.Text;
+        }
 
         return result;
     }
