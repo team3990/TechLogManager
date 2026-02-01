@@ -5,30 +5,24 @@
         mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="600"
         x:Class="TechLogManager.MainWindow"
         Title="Tech Log Manager"
-        Width="500" Height="600"
         WindowStartupLocation="CenterScreen">
 
     <Grid Margin="20" RowDefinitions="Auto,20,Auto,20,Auto,20,*,20,Auto">
         <!-- Team Selection -->
         <StackPanel Grid.Row="0">
-            <TextBlock Text="Select Your Team" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <Button Name="Team9406Button" Width="150" Height="150" Margin="10" Click="Team9406Button_Click">
-                    <Button.Content>
-                        <StackPanel>
-                            <TextBlock Text="Team 9406" FontSize="16" FontWeight="Bold" />
-                        </StackPanel>
-                    </Button.Content>
-                </Button>
-                <Button Name="Team3990Button" Width="150" Height="150" Margin="10" Click="Team3990Button_Click">
-                    <Button.Content>
-                        <StackPanel>
-                            <TextBlock Text="Team 3990" FontSize="16" FontWeight="Bold" />
-                        </StackPanel>
-                    </Button.Content>
-                </Button>
-            </StackPanel>
-            <TextBlock Name="SelectedTeamText" Text="No team selected" HorizontalAlignment="Center" Margin="0,10,0,0" />
+            <TextBlock Text="Enter Your Team Number" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+            <TextBox Name="TeamNumberTextBox" 
+                     Width="200" 
+                     Height="40" 
+                     Margin="0,10,0,0" 
+                     FontSize="16"
+                     HorizontalAlignment="Center"
+                     TextAlignment="Center"
+                     TextChanged="TeamNumberTextBox_TextChanged" />
+            <TextBlock Name="SelectedTeamText" 
+                       Text="No team entered" 
+                       HorizontalAlignment="Center" 
+                       Margin="0,10,0,0" />
         </StackPanel>
 
         <!-- Action Selection -->
@@ -47,7 +41,9 @@
             <TextBlock Text="What to Download" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
             <StackPanel HorizontalAlignment="Center" Margin="0,10,0,0">
                 <CheckBox Name="RoborioCheckbox" Content="RoboRIO Logs" IsChecked="True" />
-                <CheckBox Name="LimelightCheckbox" Content="Limelight Recordings" IsChecked="True" Margin="0,5,0,0" />
+                <CheckBox Name="LimelightCheckbox" Content="Limelight Recordings" IsChecked="True" />
+                <CheckBox Name="DsLogsCheckbox" Content="Driver station logs" IsChecked="False" />
+                <CheckBox Name="HootCheckbox" Content="CTRE (hoot) logs" IsChecked="False" />
             </StackPanel>
         </StackPanel>
 
