@@ -1,4 +1,9 @@
-﻿using System.Text.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
 using LimelightClasses;
 
 namespace TechLogManager
@@ -7,38 +12,50 @@ namespace TechLogManager
     {
         private static readonly HttpClient HttpClient = new();
 
-        public static List<string> GetVideoList(string llname)
+        public static async Task<List<string>> GetVideoListAsync(string llname)
         {
-            var response = HttpClient.GetAsync($"http://{llname}.local:5807/videolist").Result;
+            var response = await HttpClient.GetAsync($"http://{llname}.local:5807/videolist");
             response.EnsureSuccessStatusCode();
 
-            var json = response.Content.ReadAsStringAsync().Result;
+            var json = await response.Content.ReadAsStringAsync();
             var videoInfo = JsonSerializer.Deserialize<List<VideoInfo>>(json)
                             ?? throw new Exception($"limelight {llname} not found");
 
             return (from vid in videoInfo select vid.name).ToList();
         }
 
-        public static List<RecordingDetail> GetRecordings(string llname)
+        public static async Task<List<RecordingDetail>> GetRecordingsAsync(string llname)
         {
-            var response = HttpClient.GetAsync($"http://{llname}.local:5807/recording-list").Result;
+            var response = await HttpClient.GetAsync($"http://{llname}.local:5807/recording-list");
             response.EnsureSuccessStatusCode();
 
-            var json = response.Content.ReadAsStringAsync().Result;
-            var recs = JsonSerializer.Deserialize<RecordingListResponse>(json).recordings;
-            recs.Reverse();
+            var json = await response.Content.ReadAsStringAsync();
+            var recs = JsonSerializer.Deserialize<RecordingListResponse>(json)?.recordings ?? [];
+            recs.Reverse();// so its older first
 
             return recs;
         }
 
         public static List<RecordingDetail> GetRecordingLinks(string llname)
         {
-            return (from rec in GetRecordings(llname) select new RecordingDetail(llname, rec)).ToList();
+            var recordings = GetRecordingsAsync(llname).Result;
+            return (from rec in recordings select new RecordingDetail(llname, rec)).ToList();
+        }
+
+        public static async Task<List<RecordingDetail>> GetRecordingLinksAsync(string llname)
+        {
+            var recordings = await GetRecordingsAsync(llname);
+            return (from rec in recordings select new RecordingDetail(llname, rec)).ToList();
         }
 
         public static void DeleteAllVideos(string llname)
         {
-            var response = HttpClient.DeleteAsync($"http://{llname}.local:5807/delete-videos").Result;
+            DeleteAllVideosAsync(llname).Wait();
+        }
+
+        public static async Task DeleteAllVideosAsync(string llname)
+        {
+            var response = await HttpClient.DeleteAsync($"http://{llname}.local:5807/delete-videos");
             response.EnsureSuccessStatusCode();
         }
     }
