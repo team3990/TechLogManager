@@ -14,7 +14,7 @@ public partial class MainWindow
         {
             // Get list of limelights from RoboRIO
             var limelightsJson = await SshCommand(
-                $"lvuser@roboRIO-{teamNumber}-FRC.local",
+                $"roboRIO-{teamNumber}-FRC.local",
                 "cat /home/lvuser/limelights.json"
             );
 
@@ -85,10 +85,6 @@ public partial class MainWindow
     private async Task ProcessRoborioLogs(string teamNumber, int action)
     {
         Log("Processing RoboRIO logs...");
-
-        // TODO: Implement RoboRIO log download
-        // This will involve SCP commands to download .wpilog files
-        // You'll need to implement similar to your PowerShell script
 
         await Task.CompletedTask;
     }

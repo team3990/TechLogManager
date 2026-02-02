@@ -31,7 +31,7 @@ namespace TechLogManager
 
             var json = await response.Content.ReadAsStringAsync();
             var recs = JsonSerializer.Deserialize<RecordingListResponse>(json)?.recordings ?? [];
-            recs.Reverse();
+            recs.Reverse();// so its older first
 
             return recs;
         }
