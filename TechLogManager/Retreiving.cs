@@ -1,42 +1,76 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Threading.Tasks;
+using LibGit2Sharp;
+using Renci.SshNet;
 
 namespace TechLogManager;
 
 public partial class MainWindow
 {
-    private async Task<string> SshCommand(string target, string command)
+    private static async Task<string> SshCommand(string hostname, string command)
     {
-        // This is a placeholder - you'll need to implement SSH execution
-        // Options:
-        // 1. Use SSH.NET library (recommended)
-        // 2. Call ssh.exe via Process.Start
-
-        // For now, using Process.Start as example:
-        var process = new Process
+        return await Task.Run(() =>
         {
-            StartInfo = new ProcessStartInfo
+            try
             {
-                FileName = "ssh",
-                Arguments = $"{target} \"{command}\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                using var client = new SshClient(hostname, "lvuser", "");
+                client.Connect();
+
+                if (!client.IsConnected) throw new Exception($"Failed to connect to {hostname}");
+
+                var result = client.RunCommand(command);
+
+                client.Disconnect();
+
+                // Check if the command had errors
+                return result.ExitStatus != 0
+                    ? throw new Exception($"Command failed with exit code {result.ExitStatus}: {result.Error}")
+                    : result.Result;
             }
-        };
+            catch (Exception ex)
+            {
+                throw new Exception($"SSH command execution failed: {ex.Message}", ex);
+            }
+        });
+    }
 
-        process.Start();
-        var output = await process.StandardOutput.ReadToEndAsync();
-        await process.WaitForExitAsync();
+    private static async Task<string> ScpTransfer(string hostname, string filepath1, string filepath2)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                using var client = new ScpClient(hostname, "lvuser", "");
+                client.Connect();
 
-        if (process.ExitCode == 0) return output.Trim();
-        var error = await process.StandardError.ReadToEndAsync();
-        throw new Exception($"SSH command failed: {error}");
+                if (!client.IsConnected) throw new Exception($"Failed to connect to {hostname}");
 
+                // Determine transfer direction based on which path is remote
+                // Convention: if filepath1 starts with '/', it's a remote path (download)
+                // Otherwise, filepath1 is local (upload)
+                if (filepath1.StartsWith("/") && !filepath2.StartsWith("/"))
+                {
+                    // Download: remote -> local
+                    client.Download(filepath1, new FileInfo(filepath2));
+                    client.Disconnect();
+                    return $"Downloaded {filepath1} to {filepath2}";
+                }
+
+                // Upload: local -> remote
+                client.Upload(new FileInfo(filepath1), filepath2);
+                client.Disconnect();
+                return $"Uploaded {filepath1} to {filepath2}";
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"SCP transfer failed: {ex.Message}", ex);
+            }
+        });
     }
 
     private static async Task DownloadFile(string url, string outputPath)
@@ -49,56 +83,84 @@ public partial class MainWindow
         await response.Content.CopyToAsync(fileStream);
     }
 
-    private static async Task GitCommit()
+    private static void GitCommit(string message)
     {
-        // Option 1: Use LibGit2Sharp (recommended)
-        // Option 2: Call git.exe via Process.Start
-
-        var process = new Process
+        try
         {
-            StartInfo = new ProcessStartInfo
+            // Get the directory where the executable is located
+            var exeDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            using var repo = new Repository(exeDirectory);
+            // Stage all changes (modified, new, and deleted files)
+            Commands.Stage(repo, "*");
+                
+            // Check if there are any changes to commit
+            var status = repo.RetrieveStatus();
+            if (!status.Any(s => s.State != FileStatus.Ignored && s.State != FileStatus.Unaltered))
             {
-                FileName = "git",
-                Arguments = "commit -am \"Auto-commit logs\"",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                Console.WriteLine("No changes to commit");
+                return;
             }
-        };
-
-        process.Start();
-        await process.WaitForExitAsync();
-
-        if (process.ExitCode != 0)
+                
+            // Create signature for the commit
+            var signature = new Signature("TechLogManager", "nobody@example.com", DateTimeOffset.Now);
+                
+            // Commit the changes
+            var commit = repo.Commit(message, signature, signature);
+                
+            Console.WriteLine($"Committed: {commit.Sha[..7]} - {commit.MessageShort}");
+        }
+        catch (RepositoryNotFoundException)
         {
-            var error = await process.StandardError.ReadToEndAsync();
-            throw new Exception($"Git commit failed: {error}");
+            throw new Exception("Git repository not found in executable directory");
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Git commit failed: {ex.Message}", ex);
         }
     }
 
     private static async Task GitPush()
     {
-        var process = new Process
+        await Task.Run(() =>
         {
-            StartInfo = new ProcessStartInfo
+            try
             {
-                FileName = "git",
-                Arguments = "push",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                // Get the directory where the executable is located
+                var exeDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+                using var repo = new Repository(exeDirectory);
+                // Get the current branch
+                var currentBranch = repo.Head;
+                
+                if (currentBranch.TrackedBranch == null)
+                {
+                    throw new Exception("Current branch has no upstream tracking branch");
+                }
+                
+                // Get the remote
+                var remote = repo.Network.Remotes["origin"];
+                if (remote == null)
+                {
+                    throw new Exception("Remote 'origin' not found");
+                }
+                
+                // Push options (for authentication if needed)
+                var options = new PushOptions();
+                
+                // Push the current branch
+                repo.Network.Push(currentBranch, options);
+                
+                Console.WriteLine($"Pushed {currentBranch.FriendlyName} to {remote.Name}");
             }
-        };
-
-        process.Start();
-        await process.WaitForExitAsync();
-
-        if (process.ExitCode != 0)
-        {
-            var error = await process.StandardError.ReadToEndAsync();
-            throw new Exception($"Git push failed: {error}");
-        }
+            catch (RepositoryNotFoundException)
+            {
+                throw new Exception("Git repository not found in executable directory");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Git push failed: {ex.Message}", ex);
+            }
+        });
     }
 }
