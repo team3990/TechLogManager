@@ -30,8 +30,7 @@ namespace TechLogManager
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync();
-            var recs = JsonSerializer.Deserialize<RecordingListResponse>(json)?.recordings
-                       ?? new List<RecordingDetail>();
+            var recs = JsonSerializer.Deserialize<RecordingListResponse>(json)?.recordings ?? [];
             recs.Reverse();
 
             return recs;
@@ -66,13 +65,13 @@ namespace LimelightClasses
 {
     public class VideoInfo
     {
-        public string name { get; set; } = string.Empty;
+        public string name { get; set; }
         public long size { get; set; }
     }
 
     public class RecordingListResponse
     {
-        public List<RecordingDetail> recordings { get; set; } = new();
+        public List<RecordingDetail> recordings { get; set; }
     }
 
     public class RecordingDetail
@@ -90,9 +89,9 @@ namespace LimelightClasses
             bootlog = baseLink + rec.bootlog;
         }
 
-        public string video { get; set; } = string.Empty;
-        public string manifest { get; set; } = string.Empty;
-        public string bootlog { get; set; } = string.Empty;
+        public string video { get; set; }
+        public string manifest { get; set; }
+        public string bootlog { get; set; }
         public long size { get; set; }
     }
 }

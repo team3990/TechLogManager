@@ -11,17 +11,17 @@
         <!-- Team Selection -->
         <StackPanel Grid.Row="0">
             <TextBlock Text="Enter Your Team Number" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
-            <TextBox Name="TeamNumberTextBox" 
-                     Width="200" 
-                     Height="40" 
-                     Margin="0,10,0,0" 
+            <TextBox Name="TeamNumberTextBox"
+                     Width="200"
+                     Height="40"
+                     Margin="0,10,0,0"
                      FontSize="16"
                      HorizontalAlignment="Center"
                      TextAlignment="Center"
                      TextChanged="TeamNumberTextBox_TextChanged" />
-            <TextBlock Name="SelectedTeamText" 
-                       Text="No team entered" 
-                       HorizontalAlignment="Center" 
+            <TextBlock Name="SelectedTeamText"
+                       Text="No team entered"
+                       HorizontalAlignment="Center"
                        Margin="0,10,0,0" />
         </StackPanel>
 

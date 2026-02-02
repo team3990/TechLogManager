@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -24,7 +21,7 @@ public partial class MainWindow : Window
     private void TeamNumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         var teamNumber = TeamNumberTextBox.Text.Trim();
-    
+
         if (ushort.TryParse(teamNumber, out _))
         {
             _selectedTeam = teamNumber;
@@ -95,7 +92,7 @@ public partial class MainWindow : Window
         {
             CommitButton.IsEnabled = false;
             Log("Committing to git...");
-            await GitCommit();
+            GitCommit(DateTime.Now.ToLongDateString());
             Log("Git commit successful!");
         }
         catch (Exception ex)
