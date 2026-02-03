@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -7,21 +6,22 @@ using System.Reflection;
 using System.Threading.Tasks;
 using LibGit2Sharp;
 using Renci.SshNet;
+using static TechLogManager.Utils;
 
 namespace TechLogManager;
 
 public partial class MainWindow
 {
-    private static async Task<string> SshCommand(string hostname, string command)
+    private static async Task<string> SshCommand(string teamNumber, string command)
     {
         return await Task.Run(() =>
         {
             try
             {
-                using var client = new SshClient(hostname, "lvuser", "");
+                using var client = new SshClient(GetRioHostname(teamNumber), "lvuser", "");
                 client.Connect();
 
-                if (!client.IsConnected) throw new Exception($"Failed to connect to {hostname}");
+                if (!client.IsConnected) throw new Exception($"Failed to connect to {GetRioHostname(teamNumber)}");
 
                 var result = client.RunCommand(command);
 
@@ -39,16 +39,16 @@ public partial class MainWindow
         });
     }
 
-    private static async Task<string> ScpTransfer(string hostname, string filepath1, string filepath2)
+    private static async Task<string> ScpTransfer(string teamNumber, string filepath1, string filepath2)
     {
         return await Task.Run(() =>
         {
             try
             {
-                using var client = new ScpClient(hostname, "lvuser", "");
+                using var client = new ScpClient(GetRioHostname(teamNumber), "lvuser", "");
                 client.Connect();
 
-                if (!client.IsConnected) throw new Exception($"Failed to connect to {hostname}");
+                if (!client.IsConnected) throw new Exception($"Failed to connect to {GetRioHostname(teamNumber)}");
 
                 // Determine transfer direction based on which path is remote
                 // Convention: if filepath1 starts with '/', it's a remote path (download)

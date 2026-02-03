@@ -6,13 +6,7 @@ namespace TechLogManager;
 
 public static class Utils
 {
-    public static bool IsTbd(string fname)
-    {
-        return fname.StartsWith("frc_tbd", StringComparison.CurrentCultureIgnoreCase);
-    }
-
-    public static List<string> ParseJsonStringList(string json)
-    {
-        return JsonSerializer.Deserialize<List<string>>(json);
-    }
+    public static bool IsTbd(string fname) => fname.StartsWith("frc_tbd", StringComparison.CurrentCultureIgnoreCase);
+    public static List<string> ParseJsonStringList(string json) => JsonSerializer.Deserialize<List<string>>(json);
+    internal static string GetRioHostname(string teamNumber) => $"roboRIO-{teamNumber}-FRC.local";
 }

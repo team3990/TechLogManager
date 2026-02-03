@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace TechLogManager;
@@ -13,10 +15,7 @@ public partial class MainWindow
         try
         {
             // Get list of limelights from RoboRIO
-            var limelightsJson = await SshCommand(
-                $"roboRIO-{teamNumber}-FRC.local",
-                "cat /home/lvuser/limelights.json"
-            );
+            var limelightsJson = await SshCommand(teamNumber, "cat /home/lvuser/limelights.json");
 
             var limelights = Utils.ParseJsonStringList(limelightsJson);
             Log($"Found {limelights.Count} Limelight(s): {string.Join(", ", limelights)}");
@@ -86,16 +85,43 @@ public partial class MainWindow
     {
         Log("Processing RoboRIO logs...");
 
-        await Task.CompletedTask;
+        var f1 = await SshCommand(teamNumber, "find /home/lvuser/logs -name '*.wpilog' -printf '%T@ %p\n'");
+        var f2 = await SshCommand(teamNumber, "find /U/logs -name '*.wpilog' -printf '%T@ %p\n'");
+        if (f1.IsWhiteSpace()) return;
+        if (f2.IsWhiteSpace()) return;
+        var files = f1.Split("\n").Concat(f2.Split("\n")).ToList();
+
+        const string pattern = @"^(\d+\.\d+)\s+(.+)$";
+        var matches = files.Where(s => WpilogRegex().IsMatch(s))
+            .Select(s => WpilogRegex().Match(s))
+            .ToArray();
+
+        foreach (var file in matches)
+        {
+            var time = DateTimeOffset.FromUnixTimeSeconds(long.Parse(file.Groups[1].Value)).LocalDateTime;
+            var fileName = Path.GetFileName(file.Groups[2].Value);
+            var folderName = time.ToString("yyyy-MM-dd-HH'h'mm") + "@" + teamNumber;
+            Log($"Writing to folder {folderName}");
+            Log($"Processing file {fileName}");
+            var result = await ScpTransfer(teamNumber, file.Groups[2].Value, folderName);
+            Log(result);
+        }
     }
 
     private async Task ProcessDsLogs(string teamNumber, int action)
     {
         Log("Processing driver station logs...");
+
+        await Task.CompletedTask;
     }
 
     private async Task ProcessHootLogs(string teamNumber, int action)
     {
         Log("Processing ctre (hoot) logs...");
+
+        await Task.CompletedTask;
     }
+
+    [GeneratedRegex(@"^(\d+\.\d+)\s+(.+)$")]
+    private static partial Regex WpilogRegex();
 }
