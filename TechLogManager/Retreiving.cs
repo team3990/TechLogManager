@@ -1,10 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Reflection;
-using System.Threading.Tasks;
-using LibGit2Sharp;
+﻿using LibGit2Sharp;
 using Renci.SshNet;
 using static TechLogManager.Utils;
 

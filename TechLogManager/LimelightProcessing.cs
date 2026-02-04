@@ -1,10 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
-namespace TechLogManager;
+﻿namespace TechLogManager;
 
 public partial class MainWindow
 {
@@ -17,7 +11,7 @@ public partial class MainWindow
             // Get list of limelights from RoboRIO
             var limelightsJson = await SshCommand(teamNumber, "cat /home/lvuser/limelights.json");
 
-            var limelights = Utils.ParseJsonStringList(limelightsJson);
+            var limelights = Utils.ParseJsonStringList(limelightsJson) ?? throw new NullReferenceException("Failed to get limelight list");
             Log($"Found {limelights.Count} Limelight(s): {string.Join(", ", limelights)}");
 
             foreach (var llname in limelights) await ProcessSingleLimelight(action, llname, Path.Combine(destination, llname));
@@ -35,7 +29,7 @@ public partial class MainWindow
 
         if (action < 2) // Download
         {
-            var links = await Limelight.GetRecordingLinksAsync(llname);
+            var links = await LimelightUtils.GetRecordingLinksAsync(llname);
             Log($"Found {links.Count} recording(s)");
 
             for (var i = 0; i < links.Count; i++)
@@ -73,56 +67,8 @@ public partial class MainWindow
         if (action is 0 or 2) // Delete
         {
             Log($"Deleting videos from {llname}...");
-            await Limelight.DeleteAllVideosAsync(llname);
+            await LimelightUtils.DeleteAllVideosAsync(llname);
             Log($"Videos deleted from {llname}");
         }
-    }
-
-    
-    [GeneratedRegex(@"^(.+\.wpilog)$")]
-    private static partial Regex WpilogRegex();
-    private async Task ProcessRoborioLogs(string teamNumber, int action, string destination)
-    {
-        Log("Processing RoboRIO logs...");
-
-        var f1 = await SshCommand(teamNumber, "find /home/lvuser/logs -name '*.wpilog");
-        var f2 = await SshCommand(teamNumber, "find /U/logs -name '*.wpilog'");
-        if (f1.IsWhiteSpace()) return;
-        if (f2.IsWhiteSpace()) return;
-        var files = f1.Split("\n").Concat(f2.Split("\n")).ToList();
-
-        var matches = files.Where(s => WpilogRegex().IsMatch(s))
-            .Select(s => WpilogRegex().Match(s))
-            .ToArray();
-
-        foreach (var file in matches)
-        {
-            var fileName = Path.GetFileName(file.Groups[1].Value);
-            Log($"Processing file {fileName}");
-            var result = await ScpTransfer(teamNumber, file.Groups[1].Value, destination);
-            Log(result);
-        }
-
-        if (action is 0 or 2) // Delete
-        {
-            var result1 = await SshCommand(teamNumber, "rm -f /home/lvuser/logs/*.wpilog");
-            Log(result1);
-            var result2 = await SshCommand(teamNumber, "rm -f /U/logs/*.wpilog");
-            Log(result2);
-        }
-    }
-
-    private async Task ProcessDsLogs(string teamNumber, int action, string destination)
-    {
-        Log("Processing driver station logs...");
-
-        await Task.CompletedTask;
-    }
-
-    private async Task ProcessHootLogs(string teamNumber, int action, string destination)
-    {
-        Log("Processing ctre (hoot) logs...");
-
-        await Task.CompletedTask;
     }
 }

@@ -8,7 +8,7 @@ using LimelightClasses;
 
 namespace TechLogManager
 {
-    public static class Limelight
+    public static class LimelightUtils
     {
         private static readonly HttpClient HttpClient = new();
 
