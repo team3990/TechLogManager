@@ -34,7 +34,7 @@ public partial class MainWindow
             }
             catch (Exception ex)
             {
-                throw new Exception($"SSH command execution failed: {ex.Message}", ex);
+                throw new Exception($"SSH command execution failed: {ex.GetType().Name} {ex.Message}", ex);
             }
         });
     }
@@ -87,10 +87,7 @@ public partial class MainWindow
     {
         try
         {
-            // Get the directory where the executable is located
-            var exeDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-            using var repo = new Repository(exeDirectory);
+            using var repo = new Repository(ExeDirectory);
             // Stage all changes (modified, new, and deleted files)
             Commands.Stage(repo, "*");
                 
@@ -126,10 +123,7 @@ public partial class MainWindow
         {
             try
             {
-                // Get the directory where the executable is located
-                var exeDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-                using var repo = new Repository(exeDirectory);
+                using var repo = new Repository(ExeDirectory);
                 // Get the current branch
                 var currentBranch = repo.Head;
                 

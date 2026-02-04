@@ -8,7 +8,7 @@ namespace TechLogManager;
 
 public partial class MainWindow
 {
-    private async Task ProcessLimelightLogs(string teamNumber, int action)
+    private async Task ProcessLimelightLogs(string teamNumber, int action, string destination)
     {
         Log("Processing Limelight logs...");
 
@@ -20,7 +20,7 @@ public partial class MainWindow
             var limelights = Utils.ParseJsonStringList(limelightsJson);
             Log($"Found {limelights.Count} Limelight(s): {string.Join(", ", limelights)}");
 
-            foreach (var llname in limelights) await ProcessSingleLimelight(teamNumber, action, llname);
+            foreach (var llname in limelights) await ProcessSingleLimelight(action, llname, Path.Combine(destination, llname));
         }
         catch (Exception ex)
         {
@@ -29,7 +29,7 @@ public partial class MainWindow
         }
     }
 
-    private async Task ProcessSingleLimelight(string teamNumber, int action, string llname)
+    private async Task ProcessSingleLimelight(int action, string llname, string destination)
     {
         Log($"Processing Limelight: {llname}");
 
@@ -38,12 +38,9 @@ public partial class MainWindow
             var links = await Limelight.GetRecordingLinksAsync(llname);
             Log($"Found {links.Count} recording(s)");
 
-            var date = DateTime.Now.ToString("yyyy-MM-dd-HH'h'mm");
-            var baseFolder = $"{date}@{teamNumber}";
-
             for (var i = 0; i < links.Count; i++)
             {
-                var folderName = Path.Combine(baseFolder, $"rec{i + 1}");
+                var folderName = Path.Combine(destination, $"rec{i + 1}");
                 Directory.CreateDirectory(folderName);
 
                 var recording = links[i];
@@ -81,47 +78,51 @@ public partial class MainWindow
         }
     }
 
-    private async Task ProcessRoborioLogs(string teamNumber, int action)
+    
+    [GeneratedRegex(@"^(.+\.wpilog)$")]
+    private static partial Regex WpilogRegex();
+    private async Task ProcessRoborioLogs(string teamNumber, int action, string destination)
     {
         Log("Processing RoboRIO logs...");
 
-        var f1 = await SshCommand(teamNumber, "find /home/lvuser/logs -name '*.wpilog' -printf '%T@ %p\n'");
-        var f2 = await SshCommand(teamNumber, "find /U/logs -name '*.wpilog' -printf '%T@ %p\n'");
+        var f1 = await SshCommand(teamNumber, "find /home/lvuser/logs -name '*.wpilog");
+        var f2 = await SshCommand(teamNumber, "find /U/logs -name '*.wpilog'");
         if (f1.IsWhiteSpace()) return;
         if (f2.IsWhiteSpace()) return;
         var files = f1.Split("\n").Concat(f2.Split("\n")).ToList();
 
-        const string pattern = @"^(\d+\.\d+)\s+(.+)$";
         var matches = files.Where(s => WpilogRegex().IsMatch(s))
             .Select(s => WpilogRegex().Match(s))
             .ToArray();
 
         foreach (var file in matches)
         {
-            var time = DateTimeOffset.FromUnixTimeSeconds(long.Parse(file.Groups[1].Value)).LocalDateTime;
-            var fileName = Path.GetFileName(file.Groups[2].Value);
-            var folderName = time.ToString("yyyy-MM-dd-HH'h'mm") + "@" + teamNumber;
-            Log($"Writing to folder {folderName}");
+            var fileName = Path.GetFileName(file.Groups[1].Value);
             Log($"Processing file {fileName}");
-            var result = await ScpTransfer(teamNumber, file.Groups[2].Value, folderName);
+            var result = await ScpTransfer(teamNumber, file.Groups[1].Value, destination);
             Log(result);
+        }
+
+        if (action is 0 or 2) // Delete
+        {
+            var result1 = await SshCommand(teamNumber, "rm -f /home/lvuser/logs/*.wpilog");
+            Log(result1);
+            var result2 = await SshCommand(teamNumber, "rm -f /U/logs/*.wpilog");
+            Log(result2);
         }
     }
 
-    private async Task ProcessDsLogs(string teamNumber, int action)
+    private async Task ProcessDsLogs(string teamNumber, int action, string destination)
     {
         Log("Processing driver station logs...");
 
         await Task.CompletedTask;
     }
 
-    private async Task ProcessHootLogs(string teamNumber, int action)
+    private async Task ProcessHootLogs(string teamNumber, int action, string destination)
     {
         Log("Processing ctre (hoot) logs...");
 
         await Task.CompletedTask;
     }
-
-    [GeneratedRegex(@"^(\d+\.\d+)\s+(.+)$")]
-    private static partial Regex WpilogRegex();
 }

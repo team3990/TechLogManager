@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -12,15 +14,20 @@ namespace TechLogManager;
 public partial class MainWindow : Window
 {
     private string? _selectedTeam;
+    private string? _realDestFolder;
 
     public MainWindow()
     {
         InitializeComponent();
+
+        var date = DateTime.Now.ToString("yyyy-MM-dd-HH'h'mm");
+        DestinationFolderText.Text = date;
+        if (Utils.ExeDirectory != null) _realDestFolder = Path.Combine(Utils.ExeDirectory, date);
     }
 
     private void TeamNumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        var teamNumber = TeamNumberTextBox.Text.Trim();
+        var teamNumber = TeamNumberTextBox.Text?.Trim();
 
         if (ushort.TryParse(teamNumber, out _))
         {
@@ -33,12 +40,57 @@ public partial class MainWindow : Window
             _selectedTeam = null;
         }
     }
+    
+    private void DestinationFolderTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        var folderEnd = DestinationFolderTextBox.Text?.Trim();
+
+        if (Utils.ExeDirectory == null)
+        {
+            DestinationFolderText.Text = "Sus error";
+            Reset();
+            return;
+        }
+
+        if (folderEnd == null
+            || Path.HasExtension(folderEnd)
+            || Path.GetInvalidPathChars().Any(ch => folderEnd.Contains(ch))
+            || Path.GetInvalidFileNameChars().Any(ch => folderEnd.Contains(ch)))
+        {
+            Reset();
+            return;
+        }
+
+        try
+        {
+            _realDestFolder = Path.Combine(Utils.ExeDirectory, folderEnd);
+            DestinationFolderText.Text = folderEnd;
+        }
+        catch (Exception)
+        {
+            Reset();
+        }
+
+        return;
+
+        void Reset()
+        {
+            DestinationFolderText.Text = "Invalid folder name";
+            _realDestFolder = null;
+        }
+    }
 
     private async void StartButton_Click(object? sender, RoutedEventArgs e)
     {
         if (string.IsNullOrEmpty(_selectedTeam))
         {
             await ShowMessageDialog("Error", "Please select a team first!");
+            return;
+        }
+
+        if (_realDestFolder == null)
+        {
+            await ShowMessageDialog("Error", "Please enter a valid folder name");
             return;
         }
 
@@ -64,10 +116,10 @@ public partial class MainWindow : Window
             Log($"Action: {action}");
             Log("");
 
-            if (downloadLimelight) await ProcessLimelightLogs(_selectedTeam, action);
-            if (downloadRoborio) await ProcessRoborioLogs(_selectedTeam, action);
-            if (downloadDsLogs) await ProcessDsLogs(_selectedTeam, action);
-            if (downloadHoot) await ProcessHootLogs(_selectedTeam, action);
+            if (downloadLimelight) await ProcessLimelightLogs(_selectedTeam, action, _realDestFolder);
+            if (downloadRoborio) await ProcessRoborioLogs(_selectedTeam, action, _realDestFolder);
+            if (downloadDsLogs) await ProcessDsLogs(_selectedTeam, action, _realDestFolder);
+            if (downloadHoot) await ProcessHootLogs(_selectedTeam, action, _realDestFolder);
 
             Log("");
             Log("Operations completed!");
