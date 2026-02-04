@@ -2,7 +2,7 @@
 
 public partial class MainWindow
 {
-    private async Task ProcessLimelightLogs(string teamNumber, int action, string destination)
+    private async Task ProcessLimelightLogs(string teamNumber, Action action, string destination)
     {
         Log("Processing Limelight logs...");
 
@@ -23,11 +23,11 @@ public partial class MainWindow
         }
     }
 
-    private async Task ProcessSingleLimelight(int action, string llname, string destination)
+    private async Task ProcessSingleLimelight(Action action, string llname, string destination)
     {
         Log($"Processing Limelight: {llname}");
 
-        if (action < 2) // Download
+        if (action.IsDownload())
         {
             var links = await LimelightUtils.GetRecordingLinksAsync(llname);
             Log($"Found {links.Count} recording(s)");
@@ -64,7 +64,7 @@ public partial class MainWindow
             }
         }
 
-        if (action is 0 or 2) // Delete
+        if (action.IsDelete())
         {
             Log($"Deleting videos from {llname}...");
             await LimelightUtils.DeleteAllVideosAsync(llname);

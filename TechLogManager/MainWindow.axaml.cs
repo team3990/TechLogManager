@@ -95,7 +95,8 @@ public partial class MainWindow : Window
 
         try
         {
-            var action = GetSelectedAction();
+            Utils.DirCheck(_realDestFolder);
+            var action = (Action)GetSelectedAction();
             var downloadRoborio = RoborioCheckbox.IsChecked ?? false;
             var downloadLimelight = LimelightCheckbox.IsChecked ?? false;
             var downloadDsLogs = DsLogsCheckbox.IsChecked ?? false;
@@ -114,7 +115,7 @@ public partial class MainWindow : Window
 
             if (downloadLimelight) await ProcessLimelightLogs(_selectedTeam, action, _realDestFolder);
             if (downloadRoborio) await ProcessRoborioLogs(_selectedTeam, action, _realDestFolder);
-            if (downloadDsLogs) await ProcessDsLogs(_selectedTeam, action, _realDestFolder);
+            if (downloadDsLogs) ProcessDsLogs(action, _realDestFolder);
             if (downloadHoot) await ProcessHootLogs(_selectedTeam, action, _realDestFolder);
 
             Log("");
