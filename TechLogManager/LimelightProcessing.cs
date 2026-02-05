@@ -75,21 +75,21 @@ public partial class MainWindow
                 // Download video
                 if (!string.IsNullOrEmpty(links.video))
                 {
-                    Log($"  Downloading video...");
+                    Log("  Downloading video...");
                     await DownloadFile(links.video, Path.Combine(folderName, "video.avi"));
                 }
 
                 // Download manifest
                 if (!string.IsNullOrEmpty(links.manifest))
                 {
-                    Log($"  Downloading manifest...");
+                    Log("  Downloading manifest...");
                     await DownloadFile(links.manifest, Path.Combine(folderName, "manifest.jsonl"));
                 }
 
                 // Download bootlog
                 if (!string.IsNullOrEmpty(links.bootlog))
                 {
-                    Log($"  Downloading bootlog...");
+                    Log("  Downloading bootlog...");
                     await DownloadFile(links.bootlog, Path.Combine(folderName, "bootlog.txt.gz"));
                 }
 

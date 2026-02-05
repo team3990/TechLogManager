@@ -22,11 +22,13 @@ namespace TechLogManager
         /**
          * Returns all the recordings, sorted by oldest to newest
          */
-        public static async Task<List<RecordingDetail>> GetRecordingsAsync(string llname) =>
-            (await GetVideoListAsync(llname))
-            .Select(rec => new RecordingDetail(rec, llname))
-            .Reverse()// So its oldest first
-            .ToList();
+        public static async Task<List<RecordingDetail>> GetRecordingsAsync(string llname)
+        {
+            return (await GetVideoListAsync(llname))
+                .Select(rec => new RecordingDetail(rec, llname))
+                .Reverse() // So its oldest first
+                .ToList();
+        }
 
         public static async Task DeleteAllVideosAsync(string llname)
         {
@@ -46,11 +48,16 @@ namespace LimelightClasses
 
     public class RecordingDetail(string name, string limelightName) : IDisposable
     {
+        private readonly HttpClient _client = new();
+        private readonly string llname = limelightName;
         public string video { get; set; } = name + ".avi";
         public string manifest { get; set; } = name + "_manifest.jsonl";
         public string bootlog { get; set; } = name + "_bootlog.txt.gz";
-        private readonly string llname = limelightName;
-        private readonly HttpClient _client = new();
+
+        public void Dispose()
+        {
+            _client.Dispose();
+        }
 
         public RecordingDetail GetLinks()
         {
@@ -68,11 +75,6 @@ namespace LimelightClasses
             var response = await _client.DeleteAsync($"http://{llname}.local:5807/delete-video?name={video}");
             response.EnsureSuccessStatusCode();
             Dispose();
-        }
-
-        public void Dispose()
-        {
-            _client.Dispose();
         }
     }
 }
