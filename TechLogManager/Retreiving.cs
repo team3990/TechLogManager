@@ -84,7 +84,7 @@ public partial class MainWindow
             using var repo = new Repository(ExeDirectory);
             // Stage all changes (modified, new, and deleted files)
             Commands.Stage(repo, "*");
-                
+
             // Check if there are any changes to commit
             var status = repo.RetrieveStatus();
             if (!status.Any(s => s.State != FileStatus.Ignored && s.State != FileStatus.Unaltered))
@@ -92,13 +92,13 @@ public partial class MainWindow
                 Console.WriteLine("No changes to commit");
                 return;
             }
-                
+
             // Create signature for the commit
             var signature = new Signature("TechLogManager", "nobody@example.com", DateTimeOffset.Now);
-                
+
             // Commit the changes
             var commit = repo.Commit(message, signature, signature);
-                
+
             Console.WriteLine($"Committed: {commit.Sha[..7]} - {commit.MessageShort}");
         }
         catch (RepositoryNotFoundException)
@@ -120,25 +120,20 @@ public partial class MainWindow
                 using var repo = new Repository(ExeDirectory);
                 // Get the current branch
                 var currentBranch = repo.Head;
-                
+
                 if (currentBranch.TrackedBranch == null)
-                {
                     throw new Exception("Current branch has no upstream tracking branch");
-                }
-                
+
                 // Get the remote
                 var remote = repo.Network.Remotes["origin"];
-                if (remote == null)
-                {
-                    throw new Exception("Remote 'origin' not found");
-                }
-                
+                if (remote == null) throw new Exception("Remote 'origin' not found");
+
                 // Push options (for authentication if needed)
                 var options = new PushOptions();
-                
+
                 // Push the current branch
                 repo.Network.Push(currentBranch, options);
-                
+
                 Console.WriteLine($"Pushed {currentBranch.FriendlyName} to {remote.Name}");
             }
             catch (RepositoryNotFoundException)

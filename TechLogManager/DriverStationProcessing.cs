@@ -2,7 +2,7 @@
 
 public partial class MainWindow
 {
-    private void ProcessDsLogs(Action action, string destination)
+    private void ProcessDsLogs(Action action, bool amount, string destination)
     {
         Log("Processing driver station logs...");
         var files = Directory.EnumerateFiles(@"C:\Users\Public\Documents\FRC\Log Files\DSLogs");

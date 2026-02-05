@@ -9,8 +9,8 @@ namespace TechLogManager;
 
 public partial class MainWindow : Window
 {
-    private string? _selectedTeam;
     private string? _realDestFolder;
+    private string? _selectedTeam;
 
     public MainWindow()
     {
@@ -36,7 +36,7 @@ public partial class MainWindow : Window
             _selectedTeam = null;
         }
     }
-    
+
     private void DestinationFolderTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
         var folderEnd = DestinationFolderTextBox.Text?.Trim();
@@ -101,6 +101,7 @@ public partial class MainWindow : Window
             var downloadLimelight = LimelightCheckbox.IsChecked ?? false;
             var downloadDsLogs = DsLogsCheckbox.IsChecked ?? false;
             var downloadHoot = HootCheckbox.IsChecked ?? false;
+            var all = AllRadio.IsChecked ?? false;
 
             if (!downloadRoborio && !downloadLimelight && !downloadDsLogs && !downloadHoot)
             {
@@ -113,10 +114,10 @@ public partial class MainWindow : Window
             Log($"Action: {action}");
             Log("");
 
-            if (downloadLimelight) await ProcessLimelightLogs(_selectedTeam, action, _realDestFolder);
-            if (downloadRoborio) await ProcessRoborioLogs(_selectedTeam, action, _realDestFolder);
-            if (downloadDsLogs) ProcessDsLogs(action, _realDestFolder);
-            if (downloadHoot) await ProcessHootLogs(_selectedTeam, action, _realDestFolder);
+            if (downloadLimelight) await ProcessLimelightLogs(_selectedTeam, action, all, _realDestFolder);
+            if (downloadRoborio) await ProcessRoborioLogs(_selectedTeam, action, all, _realDestFolder);
+            if (downloadDsLogs) ProcessDsLogs(action, all, _realDestFolder);
+            if (downloadHoot) await ProcessHootLogs(_selectedTeam, action, all, _realDestFolder);
 
             Log("");
             Log("Operations completed!");

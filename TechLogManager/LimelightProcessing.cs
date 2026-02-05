@@ -2,19 +2,20 @@
 
 public partial class MainWindow
 {
-    private async Task ProcessLimelightLogs(string teamNumber, Action action, string destination)
+    private async Task ProcessLimelightLogs(string teamNumber, Action action, bool all, string destination)
     {
         Log("Processing Limelight logs...");
 
         try
         {
-            // Get list of limelights from RoboRIO
             var limelightsJson = await SshCommand(teamNumber, "cat /home/lvuser/limelights.json");
 
-            var limelights = Utils.ParseJsonStringList(limelightsJson) ?? throw new NullReferenceException("Failed to get limelight list");
+            var limelights = Utils.ParseJsonStringList(limelightsJson) ??
+                             throw new FileNotFoundException("Failed to get limelight list");
             Log($"Found {limelights.Count} Limelight(s): {string.Join(", ", limelights)}");
 
-            foreach (var llname in limelights) await ProcessSingleLimelight(action, llname, Path.Combine(destination, llname));
+            foreach (var llname in limelights)
+                await ProcessSingleLimelight(action, all, llname, Path.Combine(destination, llname));
         }
         catch (Exception ex)
         {
@@ -23,41 +24,73 @@ public partial class MainWindow
         }
     }
 
-    private async Task ProcessSingleLimelight(Action action, string llname, string destination)
+    private async Task ProcessSingleLimelight(Action action, bool all, string llname, string destination)
     {
         Log($"Processing Limelight: {llname}");
+        var recs = await LimelightUtils.GetRecordingsAsync(llname);
+        Log($"Found {recs.Count} recording(s)");
 
         if (action.IsDownload())
         {
-            var links = await LimelightUtils.GetRecordingLinksAsync(llname);
-            Log($"Found {links.Count} recording(s)");
-
-            for (var i = 0; i < links.Count; i++)
+            if (all)
             {
-                var folderName = Path.Combine(destination, $"rec{i + 1}");
+                for (var i = 0; i < recs.Count; i++)
+                {
+                    var folderName = Path.Combine(destination, $"rec{i + 1}");
+                    Directory.CreateDirectory(folderName);
+
+                    var links = recs[i].GetLinks();
+
+                    // Download video
+                    if (!string.IsNullOrEmpty(links.video))
+                    {
+                        Log($"  Downloading video {i + 1}...");
+                        await DownloadFile(links.video, Path.Combine(folderName, "video.avi"));
+                    }
+
+                    // Download manifest
+                    if (!string.IsNullOrEmpty(links.manifest))
+                    {
+                        Log($"  Downloading manifest {i + 1}...");
+                        await DownloadFile(links.manifest, Path.Combine(folderName, "manifest.jsonl"));
+                    }
+
+                    // Download bootlog
+                    if (!string.IsNullOrEmpty(links.bootlog))
+                    {
+                        Log($"  Downloading bootlog {i + 1}...");
+                        await DownloadFile(links.bootlog, Path.Combine(folderName, "bootlog.txt.gz"));
+                    }
+
+                    Log($"  Downloaded to {folderName}");
+                }
+            }
+            else
+            {
+                var folderName = Path.Combine(destination, "rec");
                 Directory.CreateDirectory(folderName);
 
-                var recording = links[i];
+                var links = recs[^1].GetLinks();
 
                 // Download video
-                if (!string.IsNullOrEmpty(recording.video))
+                if (!string.IsNullOrEmpty(links.video))
                 {
-                    Log($"  Downloading video {i + 1}...");
-                    await DownloadFile(recording.video, Path.Combine(folderName, "video.avi"));
+                    Log($"  Downloading video...");
+                    await DownloadFile(links.video, Path.Combine(folderName, "video.avi"));
                 }
 
                 // Download manifest
-                if (!string.IsNullOrEmpty(recording.manifest))
+                if (!string.IsNullOrEmpty(links.manifest))
                 {
-                    Log($"  Downloading manifest {i + 1}...");
-                    await DownloadFile(recording.manifest, Path.Combine(folderName, "manifest.jsonl"));
+                    Log($"  Downloading manifest...");
+                    await DownloadFile(links.manifest, Path.Combine(folderName, "manifest.jsonl"));
                 }
 
                 // Download bootlog
-                if (!string.IsNullOrEmpty(recording.bootlog))
+                if (!string.IsNullOrEmpty(links.bootlog))
                 {
-                    Log($"  Downloading bootlog {i + 1}...");
-                    await DownloadFile(recording.bootlog, Path.Combine(folderName, "bootlog.txt.gz"));
+                    Log($"  Downloading bootlog...");
+                    await DownloadFile(links.bootlog, Path.Combine(folderName, "bootlog.txt.gz"));
                 }
 
                 Log($"  Downloaded to {folderName}");
@@ -66,9 +99,17 @@ public partial class MainWindow
 
         if (action.IsDelete())
         {
-            Log($"Deleting videos from {llname}...");
-            await LimelightUtils.DeleteAllVideosAsync(llname);
-            Log($"Videos deleted from {llname}");
+            if (all)
+            {
+                Log($"Deleting videos from {llname}...");
+                await LimelightUtils.DeleteAllVideosAsync(llname);
+                Log($"Videos deleted from {llname}");
+            }
+            else
+            {
+                Log($"Deleting latest video from {llname}...");
+                await recs[^1].Delete();
+            }
         }
     }
 }

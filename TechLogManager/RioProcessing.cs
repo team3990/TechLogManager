@@ -6,7 +6,8 @@ public partial class MainWindow
 {
     [GeneratedRegex(@"^(.+\.wpilog)$")]
     private static partial Regex WpilogRegex();
-    private async Task ProcessRoborioLogs(string teamNumber, Action action, string destination)
+
+    private async Task ProcessRoborioLogs(string teamNumber, Action action, bool all, string destination)
     {
         Log("Processing RoboRIO logs...");
 
@@ -33,10 +34,10 @@ public partial class MainWindow
 
         if (action.IsDelete())
         {
-            var result1 = await SshCommand(teamNumber, "rm -f /home/lvuser/logs/*.wpilog");
-            Log(result1);
-            var result2 = await SshCommand(teamNumber, "rm -f /U/logs/*.wpilog");
-            Log(result2);
+            var result = await SshCommand(teamNumber, "rm -f /home/lvuser/logs/*.wpilog");
+            Log(result);
+            result = await SshCommand(teamNumber, "rm -f /U/logs/*.wpilog");
+            Log(result);
         }
     }
 }
