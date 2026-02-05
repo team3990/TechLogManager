@@ -2,17 +2,28 @@
 
 public partial class MainWindow
 {
-    private void ProcessDsLogs(Action action, bool amount, string destination)
+    private void ProcessDsLogs(Action action, bool all, string destination)
     {
         Log("Processing driver station logs...");
         var files = Directory.EnumerateFiles(@"C:\Users\Public\Documents\FRC\Log Files\DSLogs");
+        var rDest = Path.Combine(destination, "dslog");
+        Utils.DirCheck(rDest);
 
-        foreach (var file in files)
+        if (all)
         {
-            var rDest = Path.Combine(destination, "dslog");
-            Utils.DirCheck(rDest);
-            if (action.IsDownload()) File.Copy(file, Path.Combine(rDest, Path.GetFileName(file)));
-            if (action.IsDelete()) File.Delete(file);
+            foreach (var file in files)
+            {
+                if (action.IsDownload()) File.Copy(file, Path.Combine(rDest, Path.GetFileName(file)));
+                if (action.IsDelete()) File.Delete(file);
+            }
+        }
+        else
+        {
+            var latestFile = files.OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
+
+            if (latestFile == null) return;
+            if (action.IsDownload()) File.Copy(latestFile, Path.Combine(rDest, Path.GetFileName(latestFile)));
+            if (action.IsDelete()) File.Delete(latestFile);
         }
     }
 }
