@@ -13,6 +13,7 @@ public partial class MainWindow
         {
             foreach (var file in files)
             {
+                Log($"Processing file {file}");
                 if (action.IsDownload()) File.Copy(file, Path.Combine(rDest, Path.GetFileName(file)));
                 if (action.IsDelete()) File.Delete(file);
             }
@@ -22,6 +23,7 @@ public partial class MainWindow
             var latestFile = files.OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
 
             if (latestFile == null) return;
+            Log($"Processing file {latestFile}");
             if (action.IsDownload()) File.Copy(latestFile, Path.Combine(rDest, Path.GetFileName(latestFile)));
             if (action.IsDelete()) File.Delete(latestFile);
         }
