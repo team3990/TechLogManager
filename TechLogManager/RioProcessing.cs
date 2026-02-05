@@ -6,11 +6,35 @@ public partial class MainWindow
     {
         Log("Processing RoboRIO logs...");
 
-        var f1 = await SshCommand(teamNumber, "find /home/lvuser/logs -name '*.wpilog'");
-        var f2 = await SshCommand(teamNumber, "find /U/logs -name '*.wpilog'");
+        string? f1 = null;
+        string? f2 = null;
+        try
+        {
+            f1 = await SshCommand(teamNumber, "find /home/lvuser/logs -name '*.wpilog'");
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+
+        try
+        {
+            f2 = await SshCommand(teamNumber, "find /U/logs -name '*.wpilog'");
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+
+        if (f1 == null && f2 == null) return;
         if (f1.IsWhiteSpace() && f2.IsWhiteSpace()) return;
 
-        var files = f1.Split("\n").Concat(f2.Split("\n")).ToList();
+        var files = f1 == null
+            ? f2!.Split("\n").ToList()// f1 is null
+            : f2 == null
+                ? f1.Split("\n").ToList()// f2 is null
+                : f1.Split("\n").Concat(f2.Split("\n")).ToList();// none is null
+        if (files.Count == 0) return;
         files.Sort((a, b) =>
             string.Compare(Path.GetFileName(a), Path.GetFileName(b), StringComparison.OrdinalIgnoreCase));
 

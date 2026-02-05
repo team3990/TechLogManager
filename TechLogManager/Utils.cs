@@ -9,8 +9,7 @@ public static class Utils
 
     public static void DirCheck(string dir)
     {
-        if (Directory.Exists(dir)) return;
-        Directory.CreateDirectory(dir);
+        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
     }
 
     internal static string GetRioHostname(string teamNumber) => $"roboRIO-{teamNumber}-FRC.local";
