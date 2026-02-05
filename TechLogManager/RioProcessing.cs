@@ -30,10 +30,10 @@ public partial class MainWindow
         if (f1.IsWhiteSpace() && f2.IsWhiteSpace()) return;
 
         var files = f1 == null
-            ? f2!.Split("\n").ToList()// f1 is null
+            ? f2!.Split("\n").ToList() // f1 is null
             : f2 == null
-                ? f1.Split("\n").ToList()// f2 is null
-                : f1.Split("\n").Concat(f2.Split("\n")).ToList();// none is null
+                ? f1.Split("\n").ToList() // f2 is null
+                : f1.Split("\n").Concat(f2.Split("\n")).ToList(); // none is null
         if (files.Count == 0) return;
         files.Sort((a, b) =>
             string.Compare(Path.GetFileName(a), Path.GetFileName(b), StringComparison.OrdinalIgnoreCase));
@@ -46,21 +46,17 @@ public partial class MainWindow
 
         if (action.IsDownload())
         {
-            if (all)
+            if (all) foreach (var file in files)
             {
-                foreach (var file in files)
-                {
-                    var fileName = Path.GetFileName(file);
-                    Log($"Processing file {fileName}");
-                    var result = await ScpTransfer(teamNumber, file, destination);
-                    Log(result);
-                }
+                var fileName = Path.GetFileName(file);
+                Log($"Processing file {fileName}");
+                var result = await ScpTransfer(teamNumber, file, Path.Combine(destination, Path.GetFileName(file)));
+                Log(result);
             }
             else
             {
                 var file = files[^1];
-                Log($"Processing file {file}");
-                var result = await ScpTransfer(teamNumber, file, destination);
+                var result = await ScpTransfer(teamNumber, file, Path.Combine(destination, Path.GetFileName(file)));
                 Log(result);
             }
         }

@@ -218,6 +218,7 @@ public partial class MainWindow : Window
 
     public void Log(string message)
     {
+        Console.WriteLine(message);
         Dispatcher.UIThread.Post(() => { LogOutput.Text += message + Environment.NewLine; });
     }
 }

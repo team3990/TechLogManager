@@ -23,9 +23,9 @@ public static class Utils
     }
 }
 
-internal enum Action : byte
+internal enum Action
 {
-    DownloadAndDelete = 0,
-    Download = 1,
-    Delete = 2
+    DownloadAndDelete,
+    Download,
+    Delete
 }
