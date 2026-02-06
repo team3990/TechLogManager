@@ -1,3 +1,5 @@
+using Raphdf201.FileUtils;
+
 namespace TechLogManager;
 
 public partial class MainWindow
@@ -60,7 +62,7 @@ public partial class MainWindow
         }
 
         files.Sort((a, b) =>
-            string.Compare(Path.GetFileName(a), Path.GetFileName(b), StringComparison.OrdinalIgnoreCase));
+            string.Compare(File.GetName(a), File.GetName(b), StringComparison.OrdinalIgnoreCase));
 
         Log($"Found {files.Count} hoot log file(s)");
 
@@ -71,7 +73,7 @@ public partial class MainWindow
                 // Download all files using the same connection
                 Log($"Downloading {files.Count} file(s)...");
                 var downloadTasks = files.Select(file => 
-                    (remotePath: file, localPath: Path.Combine(destination, Path.GetFileName(file)))
+                    (remotePath: file, localPath: Path.Combine(destination, File.GetName(file)))
                 ).ToList();
 
                 var results = await connection.DownloadFilesAsync(downloadTasks);
@@ -84,8 +86,8 @@ public partial class MainWindow
             {
                 // Download only the latest file
                 var file = files[^1];
-                Log($"Downloading latest file: {Path.GetFileName(file)}");
-                var result = await connection.DownloadFileAsync(file, Path.Combine(destination, Path.GetFileName(file)));
+                Log($"Downloading latest file: {File.GetName(file)}");
+                var result = await connection.DownloadFileAsync(file, Path.Combine(destination, File.GetName(file)));
                 Log(result);
             }
         }
@@ -103,7 +105,7 @@ public partial class MainWindow
             }
             else
             {
-                Log($"Deleting latest file: {Path.GetFileName(files[^1])}");
+                Log($"Deleting latest file: {File.GetName(files[^1])}");
                 await connection.RunCommandAsync($"rm -rf {Path.GetDirectoryName(files[^1])}");
                 Log("Latest hoot log file deleted");
             }

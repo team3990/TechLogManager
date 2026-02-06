@@ -1,4 +1,6 @@
-﻿namespace TechLogManager;
+﻿using Raphdf201.FileUtils;
+
+namespace TechLogManager;
 
 public partial class MainWindow
 {
@@ -12,7 +14,7 @@ public partial class MainWindow
         if (all) foreach (var file in files)
         {
             Log($"Processing file {file}");
-            if (action.IsDownload()) File.Copy(file, Path.Combine(rDest, Path.GetFileName(file)));
+            if (action.IsDownload()) File.Copy(file, Path.Combine(rDest, File.GetName(file)));
             if (action.IsDelete()) File.Delete(file);
         }
         else
@@ -21,7 +23,7 @@ public partial class MainWindow
 
             if (latestFile == null) return;
             Log($"Processing file {latestFile}");
-            if (action.IsDownload()) File.Copy(latestFile, Path.Combine(rDest, Path.GetFileName(latestFile)));
+            if (action.IsDownload()) File.Copy(latestFile, Path.Combine(rDest, File.GetName(latestFile)));
             if (action.IsDelete()) File.Delete(latestFile);
         }
     }
