@@ -40,7 +40,6 @@ public partial class MainWindow
 
         files = (from file in files
                 where !file.StartsWith("FRC_TBD")
-                where file.EndsWith(".wpilog")
                 select file)
             .ToList();
 

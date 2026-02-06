@@ -3,6 +3,6 @@
 Supported logs :
 
 - [x] wpilog
-- [ ] hoot
+- [x] hoot
 - [x] limelight rewind
 - [x] dslog
