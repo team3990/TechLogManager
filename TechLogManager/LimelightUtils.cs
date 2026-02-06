@@ -42,8 +42,8 @@ namespace LimelightClasses
 {
     public class VideoInfo
     {
-        public string name { get; set; }
-        public long size { get; set; }
+        public string name { get; set; } = "";
+        public long size { get; set; } = 0;
     }
 
     public class RecordingDetail(string name, string limelightName) : IDisposable
