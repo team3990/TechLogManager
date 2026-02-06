@@ -20,6 +20,12 @@ public partial class MainWindow : Window
         DestinationFolderText.Text = date;
         if (Utils.ExeDirectory != null) _realDestFolder = Path.Combine(Utils.ExeDirectory, date);
     }
+    
+    private async void SettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var settingsWindow = new SettingsWindow();
+        await settingsWindow.ShowDialog(this);
+    }
 
     private void TeamNumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {

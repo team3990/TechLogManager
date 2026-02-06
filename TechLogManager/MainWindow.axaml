@@ -8,6 +8,24 @@
         WindowState="Maximized">
 
     <Grid Margin="20" RowDefinitions="Auto,20,Auto,20,Auto,20,Auto,20,Auto,20,*,20,Auto">
+        <!-- Settings Button -->
+        <Button Name="SettingsButton" 
+                HorizontalAlignment="Right" 
+                VerticalAlignment="Top"
+                Grid.Row="0"
+                Click="SettingsButton_Click"
+                Background="Transparent"
+                BorderThickness="1"
+                BorderBrush="Gray"
+                Padding="10"
+                ToolTip.Tip="Settings"
+                Cursor="Hand">
+            <StackPanel Orientation="Horizontal" Spacing="5">
+                <TextBlock Text="⚙️" FontSize="16"/>
+                <TextBlock Text="Settings" FontSize="12" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Button>
+
         <!-- Team Selection -->
         <StackPanel Grid.Row="0">
             <TextBlock Text="Enter Your Team Number" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
