@@ -1,4 +1,5 @@
 ﻿using LibGit2Sharp;
+using LibGit2Sharp.Handlers;
 
 namespace TechLogManager;
 
@@ -38,7 +39,7 @@ public static class GitOperations
         }
     }
 
-    public static async Task GitPushAsync(string repoPath)
+    public static async Task GitPushAsync(string repoPath, string? user = null, string? password = null)
     {
         await Task.Run(() =>
         {
@@ -56,7 +57,13 @@ public static class GitOperations
                 if (remote == null) throw new Exception("Remote 'origin' not found");
 
                 // Push options (for authentication if needed)
-                var options = new PushOptions();
+                PushOptions options;
+                if (user != null && password != null)
+                    options = new PushOptions
+                    {
+                        CredentialsProvider = GetCredentialHandler(user, password)
+                    };
+                else options = new PushOptions();
 
                 // Push the current branch
                 repo.Network.Push(currentBranch, options);
@@ -74,13 +81,21 @@ public static class GitOperations
         });
     }
 
-    public static async Task<bool> GitCloneAsync(string repoUrl, string repoPath)
+    public static async Task<bool> GitCloneAsync(string repoUrl, string repoPath, string? user = null, string? password = null)
     {
         await Task.Run(() =>
         {
             try
             {
-                Repository.Clone(repoUrl, repoPath);
+                if (user != null && password != null)
+                    Repository.Clone(repoUrl, repoPath, new CloneOptions
+                    {
+                        FetchOptions =
+                        {
+                            CredentialsProvider = GetCredentialHandler(user, password)
+                        }
+                    });
+                else Repository.Clone(repoUrl, repoPath);
                 return true;
             }
             catch
@@ -91,5 +106,15 @@ public static class GitOperations
             return false;
         });
         return false;
+    }
+
+    private static CredentialsHandler? GetCredentialHandler(string? user, string? password)
+    {
+        if (user == null || password == null) return null;
+        return (_, _, _) => new UsernamePasswordCredentials
+        {
+            Username = user,
+            Password = password
+        };
     }
 }
