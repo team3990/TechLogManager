@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
@@ -9,21 +8,21 @@ namespace TechLogManager;
 
 public static class Utils
 {
-    public static List<string>? ParseJsonStringList(string json) => JsonSerializer.Deserialize<List<string>>(json);
+    public static List<string>? ParseJsonStringList(string json)
+    {
+        return JsonSerializer.Deserialize<List<string>>(json);
+    }
 
     public static void DirCheck(string dir)
     {
         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
     }
 
-    internal static string GetRioHostname(string teamNumber) => $"roboRIO-{teamNumber}-FRC.local";
-
-    extension(Action action)
+    internal static string GetRioHostname(string teamNumber)
     {
-        internal bool IsDownload() => action is Action.Download or Action.DownloadAndDelete;
-        internal bool IsDelete() => action is Action.Delete or Action.DownloadAndDelete;
+        return $"roboRIO-{teamNumber}-FRC.local";
     }
-    
+
     public static async Task ShowMessageDialog(this Window window, string title, string message)
     {
         var dialog = new Window
@@ -54,6 +53,19 @@ public static class Utils
 
         dialog.Content = stack;
         await dialog.ShowDialog(window);
+    }
+
+    extension(Action action)
+    {
+        internal bool IsDownload()
+        {
+            return action is Action.Download or Action.DownloadAndDelete;
+        }
+
+        internal bool IsDelete()
+        {
+            return action is Action.Delete or Action.DownloadAndDelete;
+        }
     }
 }
 

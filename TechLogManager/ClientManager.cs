@@ -5,10 +5,10 @@ namespace TechLogManager;
 
 public class ClientManager : IDisposable
 {
-    private readonly string _teamNumber;
-    private readonly SshClient _sshClient;
-    private readonly ScpClient _scpClient;
     private readonly HttpClient _httpClient;
+    private readonly ScpClient _scpClient;
+    private readonly SshClient _sshClient;
+    private readonly string _teamNumber;
     private bool _disposed;
 
     public ClientManager(string teamNumber)
@@ -19,6 +19,30 @@ public class ClientManager : IDisposable
         _sshClient = new SshClient(hostname, "lvuser", "");
         _scpClient = new ScpClient(hostname, "lvuser", "");
         _httpClient = new HttpClient();
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+
+        try
+        {
+            if (_sshClient.IsConnected)
+                _sshClient.Disconnect();
+
+            if (_scpClient.IsConnected)
+                _scpClient.Disconnect();
+
+            _httpClient.Dispose();
+            _sshClient.Dispose();
+            _scpClient.Dispose();
+        }
+        catch
+        {
+            // ignored
+        }
+
+        _disposed = true;
     }
 
     public async Task ConnectAsync()
@@ -53,7 +77,9 @@ public class ClientManager : IDisposable
 
                 var result = _sshClient.RunCommand(command);
 
-                return result.ExitStatus != 0 ? throw new Exception($"Command failed with exit code {result.ExitStatus}: {result.Error}") : result.Result;
+                return result.ExitStatus != 0
+                    ? throw new Exception($"Command failed with exit code {result.ExitStatus}: {result.Error}")
+                    : result.Result;
             }
             catch (Exception ex)
             {
@@ -65,10 +91,7 @@ public class ClientManager : IDisposable
     public async Task<List<string>> RunCommandsAsync(params string[] commands)
     {
         var results = new List<string>();
-        foreach (var command in commands)
-        {
-            results.Add(await RunCommandAsync(command));
-        }
+        foreach (var command in commands) results.Add(await RunCommandAsync(command));
         return results;
     }
 
@@ -94,13 +117,10 @@ public class ClientManager : IDisposable
     public async Task<List<string>> DownloadFilesScpAsync(IEnumerable<(string remotePath, string localPath)> files)
     {
         var results = new List<string>();
-        foreach (var (remotePath, localPath) in files)
-        {
-            results.Add(await DownloadFileScpAsync(remotePath, localPath));
-        }
+        foreach (var (remotePath, localPath) in files) results.Add(await DownloadFileScpAsync(remotePath, localPath));
         return results;
     }
-    
+
     public async Task DownloadFileHttpAsync(string url, string outputPath)
     {
         var response = await _httpClient.GetAsync(url);
@@ -108,29 +128,5 @@ public class ClientManager : IDisposable
 
         await using var fileStream = File.Create(outputPath);
         await response.Content.CopyToAsync(fileStream);
-    }
-
-    public void Dispose()
-    {
-        if (_disposed) return;
-
-        try
-        {
-            if (_sshClient.IsConnected)
-                _sshClient.Disconnect();
-            
-            if (_scpClient.IsConnected)
-                _scpClient.Disconnect();
-
-            _httpClient.Dispose();
-            _sshClient.Dispose();
-            _scpClient.Dispose();
-        }
-        catch
-        {
-            // ignored
-        }
-
-        _disposed = true;
     }
 }

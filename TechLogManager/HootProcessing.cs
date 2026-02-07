@@ -9,7 +9,7 @@ public partial class MainWindow
         Log("Processing ctre (hoot) logs...");
 
         using var connection = new ClientManager(teamNumber);
-        
+
         try
         {
             await connection.ConnectAsync();
@@ -23,7 +23,7 @@ public partial class MainWindow
 
         string? f1;
         string? f2;
-        
+
         try
         {
             var results = await connection.RunCommandsAsync(
@@ -52,9 +52,9 @@ public partial class MainWindow
             : f2 == null
                 ? f1.Split("\n").ToList() // f2 is null
                 : f1.Split("\n").Concat(f2.Split("\n")).ToList(); // none is null
-        
+
         files = files.Where(f => !string.IsNullOrWhiteSpace(f)).ToList();
-        
+
         if (files.Count == 0)
         {
             Log("No valid hoot log files found");
@@ -72,15 +72,12 @@ public partial class MainWindow
             {
                 // Download all files using the same connection
                 Log($"Downloading {files.Count} file(s)...");
-                var downloadTasks = files.Select(file => 
+                var downloadTasks = files.Select(file =>
                     (remotePath: file, localPath: Path.Combine(destination, File.GetName(file)))
                 ).ToList();
 
                 var results = await connection.DownloadFilesScpAsync(downloadTasks);
-                foreach (var result in results)
-                {
-                    Log(result);
-                }
+                foreach (var result in results) Log(result);
             }
             else
             {
@@ -113,6 +110,7 @@ public partial class MainWindow
 
     private static string GetHootDeleteScript(string dir)
     {
-        return $"cd {dir} && find . -depth -type d | while read -r dir; do [ \"$dir\" = \".\" ] && continue; if [ -z \"$(ls -A \"$dir\")\" ]; then rmdir \"$dir\"; continue; fi; total_files=$(find \"$dir\" -maxdepth 1 -type f | wc -l); hoot_files=$(find \"$dir\" -maxdepth 1 -type f -name \"*.hoot\" | wc -l); if [ \"$total_files\" -gt 0 ] && [ \"$total_files\" -eq \"$hoot_files\" ]; then rm -rf \"$dir\"; elif [ \"$hoot_files\" -gt 0 ]; then find \"$dir\" -maxdepth 1 -type f -name \"*.hoot\" -delete; fi; done 2>/dev/null || true";
+        return
+            $"cd {dir} && find . -depth -type d | while read -r dir; do [ \"$dir\" = \".\" ] && continue; if [ -z \"$(ls -A \"$dir\")\" ]; then rmdir \"$dir\"; continue; fi; total_files=$(find \"$dir\" -maxdepth 1 -type f | wc -l); hoot_files=$(find \"$dir\" -maxdepth 1 -type f -name \"*.hoot\" | wc -l); if [ \"$total_files\" -gt 0 ] && [ \"$total_files\" -eq \"$hoot_files\" ]; then rm -rf \"$dir\"; elif [ \"$hoot_files\" -gt 0 ]; then find \"$dir\" -maxdepth 1 -type f -name \"*.hoot\" -delete; fi; done 2>/dev/null || true";
     }
 }

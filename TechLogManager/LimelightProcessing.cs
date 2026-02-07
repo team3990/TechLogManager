@@ -8,7 +8,7 @@ public partial class MainWindow
 
         // Use a single connection for getting the limelight list
         using var connection = new ClientManager(teamNumber);
-        
+
         try
         {
             await connection.ConnectAsync();
@@ -38,7 +38,8 @@ public partial class MainWindow
         }
     }
 
-    private async Task ProcessSingleLimelight(Action action, bool all, string llname, string destination, ClientManager manager)
+    private async Task ProcessSingleLimelight(Action action, bool all, string llname, string destination,
+        ClientManager manager)
     {
         Log($"Processing Limelight: {llname}");
         var recs = await LimelightUtils.GetRecordingsAsync(llname);

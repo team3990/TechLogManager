@@ -7,6 +7,7 @@ namespace TechLogManager;
 public partial class SettingsWindow : Window
 {
     private string? _repoFolder;
+
     public SettingsWindow()
     {
         InitializeComponent();

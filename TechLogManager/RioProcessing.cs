@@ -9,7 +9,7 @@ public partial class MainWindow
         Log("Processing RoboRIO logs...");
 
         using var connection = new ClientManager(teamNumber);
-        
+
         try
         {
             await connection.ConnectAsync();
@@ -23,7 +23,7 @@ public partial class MainWindow
 
         string? f1;
         string? f2;
-        
+
         try
         {
             var results = await connection.RunCommandsAsync(
@@ -52,9 +52,9 @@ public partial class MainWindow
             : f2 == null
                 ? f1.Split("\n").ToList() // f2 is null
                 : f1.Split("\n").Concat(f2.Split("\n")).ToList(); // none is null
-        
+
         files = files.Where(f => !string.IsNullOrWhiteSpace(f) && !f.StartsWith("FRC_TBD")).ToList();
-        
+
         if (files.Count == 0)
         {
             Log("No valid RoboRIO log files found");
@@ -71,15 +71,12 @@ public partial class MainWindow
             if (all)
             {
                 Log($"Downloading {files.Count} file(s)...");
-                var downloadTasks = files.Select(file => 
+                var downloadTasks = files.Select(file =>
                     (remotePath: file, localPath: Path.Combine(destination, File.GetName(file)))
                 ).ToList();
 
                 var results = await connection.DownloadFilesScpAsync(downloadTasks);
-                foreach (var result in results)
-                {
-                    Log(result);
-                }
+                foreach (var result in results) Log(result);
             }
             else
             {

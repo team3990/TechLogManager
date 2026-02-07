@@ -7,50 +7,50 @@
         WindowStartupLocation="CenterOwner"
         Icon="/Assets/icon.ico"
         CanResize="False">
-    
+
     <Grid Margin="20" RowDefinitions="*,Auto">
         <ScrollViewer Grid.Row="0">
             <StackPanel Spacing="15">
-                <TextBlock Text="General Settings" FontSize="18" FontWeight="Bold"/>
-                <Separator/>
-                
+                <TextBlock Text="General Settings" FontSize="18" FontWeight="Bold" />
+                <Separator />
+
                 <!-- Default Team Number -->
-                <TextBlock Text="Default Team Number:" Margin="0,15,0,5" FontWeight="SemiBold"/>
-                <TextBox Name="DefaultTeamTextBox" 
+                <TextBlock Text="Default Team Number:" Margin="0,15,0,5" FontWeight="SemiBold" />
+                <TextBox Name="DefaultTeamTextBox"
                          Width="200"
-                         HorizontalAlignment="Left"/>
-                
+                         HorizontalAlignment="Left" />
+
                 <!-- Logs repo location -->
-                <TextBlock Text="Logs repo location:" Margin="0,15,0,5" FontWeight="SemiBold"/>
+                <TextBlock Text="Logs repo location:" Margin="0,15,0,5" FontWeight="SemiBold" />
                 <StackPanel Orientation="Horizontal" Spacing="10">
                     <TextBox Name="RepoFolderTextBox"
                              Width="300"
-                             HorizontalAlignment="Left"/>
+                             HorizontalAlignment="Left" />
                     <Button
                         Name="BrowseRepoFolderButton"
                         Content="Browse"
                         Width="100"
                         Height="35"
-                        Click="BrowseRepoFolderButton_Click"/>
+                        Click="BrowseRepoFolderButton_Click" />
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
-        
-        <StackPanel Grid.Row="1" 
-                    Orientation="Horizontal" 
-                    HorizontalAlignment="Right" 
-                    Spacing="10" 
+
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="10"
                     Margin="0,20,0,0">
             <Button Name="CancelButton"
-                    Content="Cancel" 
-                    Width="100" 
+                    Content="Cancel"
+                    Width="100"
                     Height="35"
-                    Click="CancelButton_Click"/>
-            <Button Name="SaveButton" 
-                    Content="Save" 
-                    Width="100" 
+                    Click="CancelButton_Click" />
+            <Button Name="SaveButton"
+                    Content="Save"
+                    Width="100"
                     Height="35"
-                    Click="SaveButton_Click"/>
+                    Click="SaveButton_Click" />
         </StackPanel>
     </Grid>
 </Window>

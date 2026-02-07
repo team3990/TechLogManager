@@ -18,10 +18,7 @@ public class SettingsManager
     public void Save()
     {
         var directory = Path.GetDirectoryName(SettingsPath)!;
-        if (!Directory.Exists(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
+        if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
 
         var json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(SettingsPath, json);
@@ -35,13 +32,11 @@ public class SettingsManager
             Console.WriteLine("Settings file not found, creating new");
             return new SettingsManager();
         }
+
         try
         {
             var json = JsonSerializer.Deserialize<SettingsManager>(File.ReadAllText(SettingsPath));
-            if (json == null)
-            {
-                throw new Exception();
-            }
+            if (json == null) throw new Exception();
             Console.WriteLine("Got settings");
             return json;
         }

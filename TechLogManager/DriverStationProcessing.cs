@@ -11,11 +11,14 @@ public partial class MainWindow
         var rDest = Path.Combine(destination, "dslog");
         Utils.DirCheck(rDest);
 
-        if (all) foreach (var file in files)
+        if (all)
         {
-            Log($"Processing file {file}");
-            if (action.IsDownload()) File.Copy(file, Path.Combine(rDest, File.GetName(file)));
-            if (action.IsDelete()) File.Delete(file);
+            foreach (var file in files)
+            {
+                Log($"Processing file {file}");
+                if (action.IsDownload()) File.Copy(file, Path.Combine(rDest, File.GetName(file)));
+                if (action.IsDelete()) File.Delete(file);
+            }
         }
         else
         {
