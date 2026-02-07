@@ -16,18 +16,18 @@
                 
                 <!-- Default Team Number -->
                 <TextBlock Text="Default Team Number:" Margin="0,15,0,5" FontWeight="SemiBold"/>
-                <TextBox x:Name="DefaultTeamTextBox" 
+                <TextBox Name="DefaultTeamTextBox" 
                          Width="200"
                          HorizontalAlignment="Left"/>
                 
                 <!-- Logs repo location -->
                 <TextBlock Text="Logs repo location:" Margin="0,15,0,5" FontWeight="SemiBold"/>
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBox x:Name="RepoFolderTextBox" 
+                    <TextBox Name="RepoFolderTextBox" 
                              Width="300"
                              HorizontalAlignment="Left"/>
                     <Button
-                        x:Name="BrowseRepoFolderButton"
+                        Name="BrowseRepoFolderButton"
                         Content="Browse"
                         Width="100"
                         Height="35"
@@ -41,12 +41,12 @@
                     HorizontalAlignment="Right" 
                     Spacing="10" 
                     Margin="0,20,0,0">
-            <Button x:Name="CancelButton" 
+            <Button Name="CancelButton"
                     Content="Cancel" 
                     Width="100" 
                     Height="35"
                     Click="CancelButton_Click"/>
-            <Button x:Name="SaveButton" 
+            <Button Name="SaveButton" 
                     Content="Save" 
                     Width="100" 
                     Height="35"

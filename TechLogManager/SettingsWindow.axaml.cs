@@ -1,6 +1,5 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 
 namespace TechLogManager;
@@ -14,32 +13,19 @@ public partial class SettingsWindow : Window
         LoadSettings();
     }
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
-
     private void LoadSettings()
     {
-        DefaultTeamTextBox?.Text = SettingsManager.Instance.DefaultTeamNumber;
-        RepoFolderTextBox?.Text = SettingsManager.Instance.RepositoryLocation;
+        var i = SettingsManager.Instance;
+        DefaultTeamTextBox.Text = i.DefaultTeamNumber;
+        RepoFolderTextBox.Text = i.RepositoryLocation;
     }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-
-        if (DefaultTeamTextBox.Text != null)
-        {
-            SettingsManager.Instance.DefaultTeamNumber = DefaultTeamTextBox.Text;
-        }
-        
-        if (RepoFolderTextBox.Text != null)
-        {
-            SettingsManager.Instance.RepositoryLocation = RepoFolderTextBox.Text;
-        }
-        
-        SettingsManager.Instance.Save();
-
+        var i = SettingsManager.Instance;
+        if (DefaultTeamTextBox.Text != null) i.DefaultTeamNumber = DefaultTeamTextBox.Text;
+        if (RepoFolderTextBox.Text != null) i.RepositoryLocation = RepoFolderTextBox.Text;
+        i.Save();
         Close();
     }
 

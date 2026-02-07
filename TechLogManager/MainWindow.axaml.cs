@@ -68,7 +68,7 @@ public partial class MainWindow : Window
             _realDestFolder = Path.Combine(Utils.ExeDirectory, folderEnd);
             DestinationFolderText.Text = folderEnd;
         }
-        catch (Exception)
+        catch
         {
             Reset();
         }
@@ -86,13 +86,13 @@ public partial class MainWindow : Window
     {
         if (string.IsNullOrEmpty(_selectedTeam))
         {
-            await ShowMessageDialog("Error", "Please select a team first!");
+            await this.ShowMessageDialog("Error", "Please select a team first!");
             return;
         }
 
         if (_realDestFolder == null)
         {
-            await ShowMessageDialog("Error", "Please enter a valid folder name");
+            await this.ShowMessageDialog("Error", "Please enter a valid folder name");
             return;
         }
 
@@ -111,7 +111,7 @@ public partial class MainWindow : Window
 
             if (!downloadRoborio && !downloadLimelight && !downloadDsLogs && !downloadHoot)
             {
-                await ShowMessageDialog("Error", "Please select at least one log type!");
+                await this.ShowMessageDialog("Error", "Please select at least one log type!");
                 return;
             }
 
@@ -134,7 +134,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             Log($"ERROR: {ex.Message}");
-            await ShowMessageDialog("Error", $"Operation failed: {ex.Message}");
+            await this.ShowMessageDialog("Error", $"Operation failed: {ex.Message}");
         }
         finally
         {
@@ -154,7 +154,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             Log($"Git commit failed: {ex.Message}");
-            await ShowMessageDialog("Error", $"Git commit failed: {ex.Message}");
+            await this.ShowMessageDialog("Error", $"Git commit failed: {ex.Message}");
         }
         finally
         {
@@ -174,7 +174,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             Log($"Git push failed: {ex.Message}");
-            await ShowMessageDialog("Error", $"Git push failed: {ex.Message}");
+            await this.ShowMessageDialog("Error", $"Git push failed: {ex.Message}");
         }
         finally
         {
@@ -190,39 +190,7 @@ public partial class MainWindow : Window
         return 0;
     }
 
-    private async Task ShowMessageDialog(string title, string message)
-    {
-        var dialog = new Window
-        {
-            Title = title,
-            Width = 400,
-            Height = 150,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            CanResize = false
-        };
-
-        var stack = new StackPanel { Margin = new Thickness(20) };
-        stack.Children.Add(new TextBlock
-        {
-            Text = message,
-            TextWrapping = TextWrapping.Wrap,
-            Margin = new Thickness(0, 0, 0, 20)
-        });
-
-        var button = new Button
-        {
-            Content = "OK",
-            HorizontalAlignment = HorizontalAlignment.Center,
-            Width = 100
-        };
-        button.Click += (_, _) => dialog.Close();
-        stack.Children.Add(button);
-
-        dialog.Content = stack;
-        await dialog.ShowDialog(this);
-    }
-
-    public void Log(string message)
+    private void Log(string message)
     {
         Console.WriteLine(message);
         Dispatcher.UIThread.Post(() => { LogOutput.Text += message + Environment.NewLine; });

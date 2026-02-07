@@ -13,14 +13,7 @@ public class SettingsManager
     public string DefaultTeamNumber { get; set; } = "";
     public string RepositoryLocation { get; set; } = "";
 
-    public static SettingsManager Instance
-    {
-        get
-        {
-            field ??= Load();
-            return field;
-        }
-    }
+    public static SettingsManager Instance => field ?? Load();
 
     public void Save()
     {
@@ -36,14 +29,25 @@ public class SettingsManager
 
     private static SettingsManager Load()
     {
-        if (!File.Exists(SettingsPath)) return new SettingsManager();
+        Console.WriteLine("Loading settings");
+        if (!File.Exists(SettingsPath))
+        {
+            Console.WriteLine("Settings file not found, creating new");
+            return new SettingsManager();
+        }
         try
         {
-            var json = File.ReadAllText(SettingsPath);
-            return JsonSerializer.Deserialize<SettingsManager>(json) ?? new SettingsManager();
+            var json = JsonSerializer.Deserialize<SettingsManager>(File.ReadAllText(SettingsPath));
+            if (json == null)
+            {
+                throw new Exception();
+            }
+            Console.WriteLine("Got settings");
+            return json;
         }
         catch
         {
+            Console.WriteLine("Failed to read settings file, creating new");
             return new SettingsManager();
         }
     }
