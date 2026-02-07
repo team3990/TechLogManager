@@ -1,4 +1,3 @@
-using LibGit2Sharp;
 using Renci.SshNet;
 using static TechLogManager.Utils;
 
@@ -9,6 +8,7 @@ public class ClientManager : IDisposable
     private readonly string _teamNumber;
     private readonly SshClient _sshClient;
     private readonly ScpClient _scpClient;
+    private readonly HttpClient _httpClient;
     private bool _disposed;
 
     public ClientManager(string teamNumber)
@@ -18,6 +18,7 @@ public class ClientManager : IDisposable
 
         _sshClient = new SshClient(hostname, "lvuser", "");
         _scpClient = new ScpClient(hostname, "lvuser", "");
+        _httpClient = new HttpClient();
     }
 
     public async Task ConnectAsync()
@@ -52,10 +53,7 @@ public class ClientManager : IDisposable
 
                 var result = _sshClient.RunCommand(command);
 
-                if (result.ExitStatus != 0)
-                    throw new Exception($"Command failed with exit code {result.ExitStatus}: {result.Error}");
-
-                return result.Result;
+                return result.ExitStatus != 0 ? throw new Exception($"Command failed with exit code {result.ExitStatus}: {result.Error}") : result.Result;
             }
             catch (Exception ex)
             {
@@ -74,7 +72,7 @@ public class ClientManager : IDisposable
         return results;
     }
 
-    public async Task<string> DownloadFileAsync(string remotePath, string localPath)
+    public async Task<string> DownloadFileScpAsync(string remotePath, string localPath)
     {
         return await Task.Run(() =>
         {
@@ -93,14 +91,23 @@ public class ClientManager : IDisposable
         });
     }
 
-    public async Task<List<string>> DownloadFilesAsync(IEnumerable<(string remotePath, string localPath)> files)
+    public async Task<List<string>> DownloadFilesScpAsync(IEnumerable<(string remotePath, string localPath)> files)
     {
         var results = new List<string>();
         foreach (var (remotePath, localPath) in files)
         {
-            results.Add(await DownloadFileAsync(remotePath, localPath));
+            results.Add(await DownloadFileScpAsync(remotePath, localPath));
         }
         return results;
+    }
+    
+    public async Task DownloadFileHttpAsync(string url, string outputPath)
+    {
+        var response = await _httpClient.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        await using var fileStream = File.Create(outputPath);
+        await response.Content.CopyToAsync(fileStream);
     }
 
     public void Dispose()
@@ -115,6 +122,7 @@ public class ClientManager : IDisposable
             if (_scpClient.IsConnected)
                 _scpClient.Disconnect();
 
+            _httpClient.Dispose();
             _sshClient.Dispose();
             _scpClient.Dispose();
         }
@@ -124,88 +132,5 @@ public class ClientManager : IDisposable
         }
 
         _disposed = true;
-    }
-}
-
-public static class RemoteOperations
-{
-    public static async Task DownloadFileAsync(string url, string outputPath)
-    {
-        using var client = new HttpClient();
-        var response = await client.GetAsync(url);
-        response.EnsureSuccessStatusCode();
-
-        await using var fileStream = File.Create(outputPath);
-        await response.Content.CopyToAsync(fileStream);
-    }
-
-    public static void GitCommit(string repoPath, string message)
-    {
-        try
-        {
-            using var repo = new Repository(repoPath);
-            // Stage all changes (modified, new, and deleted files)
-            Commands.Stage(repo, "*");
-
-            // Check if there are any changes to commit
-            var status = repo.RetrieveStatus();
-            if (!status.Any(s => s.State != FileStatus.Ignored && s.State != FileStatus.Unaltered))
-            {
-                Console.WriteLine("No changes to commit");
-                return;
-            }
-
-            // Create signature for the commit
-            var signature = new Signature("TechLogManager", "nobody@example.com", DateTimeOffset.Now);
-
-            // Commit the changes
-            var commit = repo.Commit(message, signature, signature);
-
-            Console.WriteLine($"Committed: {commit.Sha[..7]} - {commit.MessageShort}");
-        }
-        catch (RepositoryNotFoundException)
-        {
-            throw new Exception("Git repository not found in executable directory");
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Git commit failed: {ex.Message}", ex);
-        }
-    }
-
-    public static async Task GitPushAsync(string repoPath)
-    {
-        await Task.Run(() =>
-        {
-            try
-            {
-                using var repo = new Repository(repoPath);
-                // Get the current branch
-                var currentBranch = repo.Head;
-
-                if (currentBranch.TrackedBranch == null)
-                    throw new Exception("Current branch has no upstream tracking branch");
-
-                // Get the remote
-                var remote = repo.Network.Remotes["origin"];
-                if (remote == null) throw new Exception("Remote 'origin' not found");
-
-                // Push options (for authentication if needed)
-                var options = new PushOptions();
-
-                // Push the current branch
-                repo.Network.Push(currentBranch, options);
-
-                Console.WriteLine($"Pushed {currentBranch.FriendlyName} to {remote.Name}");
-            }
-            catch (RepositoryNotFoundException)
-            {
-                throw new Exception("Git repository not found in executable directory");
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Git push failed: {ex.Message}", ex);
-            }
-        });
     }
 }

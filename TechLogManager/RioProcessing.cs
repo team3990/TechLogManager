@@ -75,7 +75,7 @@ public partial class MainWindow
                     (remotePath: file, localPath: Path.Combine(destination, File.GetName(file)))
                 ).ToList();
 
-                var results = await connection.DownloadFilesAsync(downloadTasks);
+                var results = await connection.DownloadFilesScpAsync(downloadTasks);
                 foreach (var result in results)
                 {
                     Log(result);
@@ -86,7 +86,7 @@ public partial class MainWindow
                 // Download only the latest file
                 var file = files[^1];
                 Log($"Downloading latest file: {File.GetName(file)}");
-                var result = await connection.DownloadFileAsync(file, Path.Combine(destination, File.GetName(file)));
+                var result = await connection.DownloadFileScpAsync(file, Path.Combine(destination, File.GetName(file)));
                 Log(result);
             }
         }

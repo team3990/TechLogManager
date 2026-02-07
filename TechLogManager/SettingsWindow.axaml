@@ -23,7 +23,7 @@
                 <!-- Logs repo location -->
                 <TextBlock Text="Logs repo location:" Margin="0,15,0,5" FontWeight="SemiBold"/>
                 <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBox Name="RepoFolderTextBox" 
+                    <TextBox Name="RepoFolderTextBox"
                              Width="300"
                              HorizontalAlignment="Left"/>
                     <Button

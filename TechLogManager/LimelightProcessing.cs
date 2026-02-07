@@ -29,7 +29,7 @@ public partial class MainWindow
             Log($"Found {limelights.Count} Limelight(s): {string.Join(", ", limelights)}");
 
             foreach (var llname in limelights)
-                await ProcessSingleLimelight(action, all, llname, Path.Combine(destination, llname));
+                await ProcessSingleLimelight(action, all, llname, Path.Combine(destination, llname), connection);
         }
         catch (Exception ex)
         {
@@ -38,7 +38,7 @@ public partial class MainWindow
         }
     }
 
-    private async Task ProcessSingleLimelight(Action action, bool all, string llname, string destination)
+    private async Task ProcessSingleLimelight(Action action, bool all, string llname, string destination, ClientManager manager)
     {
         Log($"Processing Limelight: {llname}");
         var recs = await LimelightUtils.GetRecordingsAsync(llname);
@@ -59,21 +59,21 @@ public partial class MainWindow
                     if (!string.IsNullOrEmpty(links.video))
                     {
                         Log($"  Downloading video {i + 1}...");
-                        await RemoteOperations.DownloadFileAsync(links.video, Path.Combine(folderName, "video.avi"));
+                        await manager.DownloadFileHttpAsync(links.video, Path.Combine(folderName, "video.avi"));
                     }
 
                     // Download manifest
                     if (!string.IsNullOrEmpty(links.manifest))
                     {
                         Log($"  Downloading manifest {i + 1}...");
-                        await RemoteOperations.DownloadFileAsync(links.manifest, Path.Combine(folderName, "manifest.jsonl"));
+                        await manager.DownloadFileHttpAsync(links.manifest, Path.Combine(folderName, "manifest.jsonl"));
                     }
 
                     // Download bootlog
                     if (!string.IsNullOrEmpty(links.bootlog))
                     {
                         Log($"  Downloading bootlog {i + 1}...");
-                        await RemoteOperations.DownloadFileAsync(links.bootlog, Path.Combine(folderName, "bootlog.txt.gz"));
+                        await manager.DownloadFileHttpAsync(links.bootlog, Path.Combine(folderName, "bootlog.txt.gz"));
                     }
 
                     Log($"  Downloaded to {folderName}");
@@ -90,21 +90,21 @@ public partial class MainWindow
                 if (!string.IsNullOrEmpty(links.video))
                 {
                     Log("  Downloading video...");
-                    await RemoteOperations.DownloadFileAsync(links.video, Path.Combine(folderName, "video.avi"));
+                    await manager.DownloadFileHttpAsync(links.video, Path.Combine(folderName, "video.avi"));
                 }
 
                 // Download manifest
                 if (!string.IsNullOrEmpty(links.manifest))
                 {
                     Log("  Downloading manifest...");
-                    await RemoteOperations.DownloadFileAsync(links.manifest, Path.Combine(folderName, "manifest.jsonl"));
+                    await manager.DownloadFileHttpAsync(links.manifest, Path.Combine(folderName, "manifest.jsonl"));
                 }
 
                 // Download bootlog
                 if (!string.IsNullOrEmpty(links.bootlog))
                 {
                     Log("  Downloading bootlog...");
-                    await RemoteOperations.DownloadFileAsync(links.bootlog, Path.Combine(folderName, "bootlog.txt.gz"));
+                    await manager.DownloadFileHttpAsync(links.bootlog, Path.Combine(folderName, "bootlog.txt.gz"));
                 }
 
                 Log($"  Downloaded to {folderName}");

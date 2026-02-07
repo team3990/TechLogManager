@@ -142,7 +142,7 @@ public partial class MainWindow : Window
         {
             CommitButton.IsEnabled = false;
             Log("Committing to git...");
-            RemoteOperations.GitCommit(SettingsManager.Instance.RepositoryLocation, DateTime.Now.ToLongDateString());
+            GitOperations.GitCommit(SettingsManager.Instance.RepositoryLocation, DateTime.Now.ToLongDateString());
             Log("Git commit successful!");
         }
         catch (Exception ex)
@@ -162,7 +162,7 @@ public partial class MainWindow : Window
         {
             PushButton.IsEnabled = false;
             Log("Pushing to remote...");
-            await RemoteOperations.GitPushAsync(SettingsManager.Instance.RepositoryLocation);
+            await GitOperations.GitPushAsync(SettingsManager.Instance.RepositoryLocation);
             Log("Git push successful!");
         }
         catch (Exception ex)
