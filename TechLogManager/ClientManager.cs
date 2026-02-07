@@ -139,11 +139,11 @@ public static class RemoteOperations
         await response.Content.CopyToAsync(fileStream);
     }
 
-    public static void GitCommit(string message)
+    public static void GitCommit(string repoPath, string message)
     {
         try
         {
-            using var repo = new Repository(ExeDirectory);
+            using var repo = new Repository(repoPath);
             // Stage all changes (modified, new, and deleted files)
             Commands.Stage(repo, "*");
 
@@ -173,13 +173,13 @@ public static class RemoteOperations
         }
     }
 
-    public static async Task GitPushAsync()
+    public static async Task GitPushAsync(string repoPath)
     {
         await Task.Run(() =>
         {
             try
             {
-                using var repo = new Repository(ExeDirectory);
+                using var repo = new Repository(repoPath);
                 // Get the current branch
                 var currentBranch = repo.Head;
 

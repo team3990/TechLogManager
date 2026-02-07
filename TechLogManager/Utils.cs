@@ -18,8 +18,6 @@ public static class Utils
 
     internal static string GetRioHostname(string teamNumber) => $"roboRIO-{teamNumber}-FRC.local";
 
-    internal static readonly string? ExeDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
     extension(Action action)
     {
         internal bool IsDownload() => action is Action.Download or Action.DownloadAndDelete;

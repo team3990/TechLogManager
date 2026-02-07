@@ -16,11 +16,19 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        var date = DateTime.Now.ToString("yyyy-MM-dd-HH'h'mm");
-        DestinationFolderText.Text = date;
-        if (Utils.ExeDirectory != null) _realDestFolder = Path.Combine(Utils.ExeDirectory, date);
+        var i = SettingsManager.Instance;
+        SetFolderPathDate();
+        TeamNumberTextBox.Text = i.DefaultTeamNumber;
     }
-    
+
+    private void SetFolderPathDate()
+    {
+        var date = DateTime.Now.ToString("yyyy-MM-dd-HH'h'mm");
+        var i = SettingsManager.Instance;
+        _realDestFolder = Path.Combine(i.RepositoryLocation, date);
+        DestinationFolderText.Text = _realDestFolder;
+    }
+
     private async void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
         var settingsWindow = new SettingsWindow();
@@ -47,38 +55,24 @@ public partial class MainWindow : Window
     {
         var folderEnd = DestinationFolderTextBox.Text?.Trim();
 
-        if (Utils.ExeDirectory == null)
-        {
-            DestinationFolderText.Text = "Sus error";
-            Reset();
-            return;
-        }
-
         if (folderEnd == null
+            || folderEnd.IsWhiteSpace()
             || Path.HasExtension(folderEnd)
             || Path.GetInvalidPathChars().Any(ch => folderEnd.Contains(ch))
             || Path.GetInvalidFileNameChars().Any(ch => folderEnd.Contains(ch)))
         {
-            Reset();
+            SetFolderPathDate();
             return;
         }
 
         try
         {
-            _realDestFolder = Path.Combine(Utils.ExeDirectory, folderEnd);
-            DestinationFolderText.Text = folderEnd;
+            _realDestFolder = Path.Combine(SettingsManager.Instance.RepositoryLocation, folderEnd);
+            DestinationFolderText.Text = _realDestFolder;
         }
         catch
         {
-            Reset();
-        }
-
-        return;
-
-        void Reset()
-        {
-            DestinationFolderText.Text = "Invalid folder name";
-            _realDestFolder = null;
+            SetFolderPathDate();
         }
     }
 
@@ -148,7 +142,7 @@ public partial class MainWindow : Window
         {
             CommitButton.IsEnabled = false;
             Log("Committing to git...");
-            RemoteOperations.GitCommit(DateTime.Now.ToLongDateString());
+            RemoteOperations.GitCommit(SettingsManager.Instance.RepositoryLocation, DateTime.Now.ToLongDateString());
             Log("Git commit successful!");
         }
         catch (Exception ex)
@@ -168,7 +162,7 @@ public partial class MainWindow : Window
         {
             PushButton.IsEnabled = false;
             Log("Pushing to remote...");
-            await RemoteOperations.GitPushAsync();
+            await RemoteOperations.GitPushAsync(SettingsManager.Instance.RepositoryLocation);
             Log("Git push successful!");
         }
         catch (Exception ex)
