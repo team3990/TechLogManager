@@ -120,7 +120,6 @@ public partial class MainWindow : Window
             Log("Operations completed!");
 
             CommitButton.IsEnabled = true;
-            PushButton.IsEnabled = true;
         }
         catch (Exception ex)
         {
@@ -150,26 +149,6 @@ public partial class MainWindow : Window
         finally
         {
             CommitButton.IsEnabled = true;
-        }
-    }
-
-    private async void PushButton_Click(object? sender, RoutedEventArgs e)
-    {
-        try
-        {
-            PushButton.IsEnabled = false;
-            Log("Pushing to remote...");
-            await GitOperations.GitPushAsync(SettingsManager.Instance.RepositoryLocation);
-            Log("Git push successful!");
-        }
-        catch (Exception ex)
-        {
-            Log($"Git push failed: {ex.Message}");
-            await this.ShowMessageDialog("Error", $"Git push failed: {ex.Message}");
-        }
-        finally
-        {
-            PushButton.IsEnabled = true;
         }
     }
 

@@ -102,8 +102,6 @@
             <Button Name="StartButton" Content="Start" Width="120" Height="40" Click="StartButton_Click" Margin="5" />
             <Button Name="CommitButton" Content="Commit" Width="120" Height="40" Click="CommitButton_Click"
                     Margin="5" IsEnabled="False" />
-            <Button Name="PushButton" Content="Push" Width="120" Height="40" Click="PushButton_Click" Margin="5"
-                    IsEnabled="False" />
         </StackPanel>
     </Grid>
 </Window>

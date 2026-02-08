@@ -22,7 +22,7 @@ public static class GitOperations
             }
 
             // Create signature for the commit
-            var signature = new Signature("TechLogManager", "nobody@example.com", DateTimeOffset.Now);
+            var signature = new Signature("TechLogManager", "logs@team3990.com", DateTimeOffset.Now);
 
             // Commit the changes
             var commit = repo.Commit(message, signature, signature);
