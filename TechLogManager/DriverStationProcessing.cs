@@ -16,7 +16,7 @@ public partial class MainWindow
             foreach (var file in files)
             {
                 Log($"Processing file {file}");
-                if (action.IsDownload()) File.Copy(file, Path.Combine(rDest, File.GetName(file)));
+                if (action.IsDownload()) File.Copy(file, Path.Combine(rDest, file.GetFileName()!));
                 if (action.IsDelete()) File.Delete(file);
             }
         }
@@ -26,7 +26,7 @@ public partial class MainWindow
 
             if (latestFile == null) return;
             Log($"Processing file {latestFile}");
-            if (action.IsDownload()) File.Copy(latestFile, Path.Combine(rDest, File.GetName(latestFile)));
+            if (action.IsDownload()) File.Copy(latestFile, Path.Combine(rDest, latestFile.GetFileName()!));
             if (action.IsDelete()) File.Delete(latestFile);
         }
     }
