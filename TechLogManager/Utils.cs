@@ -13,11 +13,6 @@ public static class Utils
         return JsonSerializer.Deserialize<List<string>>(json);
     }
 
-    public static void DirCheck(string dir)
-    {
-        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-    }
-
     internal static string GetRioHostname(string teamNumber)
     {
         return $"roboRIO-{teamNumber}-FRC.local";

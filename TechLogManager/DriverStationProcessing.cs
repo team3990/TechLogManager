@@ -9,7 +9,7 @@ public partial class MainWindow
         Log("Processing driver station logs...");
         var files = Directory.EnumerateFiles(@"C:\Users\Public\Documents\FRC\Log Files\DSLogs");
         var rDest = Path.Combine(destination, "dslog");
-        Utils.DirCheck(rDest);
+        Directory.CreateDirectory(rDest);
 
         if (all)
         {

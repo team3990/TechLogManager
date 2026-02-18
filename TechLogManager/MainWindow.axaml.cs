@@ -92,7 +92,7 @@ public partial class MainWindow : Window
 
         try
         {
-            Utils.DirCheck(_realDestFolder);
+            Directory.CreateDirectory(_realDestFolder);
             var action = (Action)GetSelectedAction();
             var downloadRoborio = RoborioCheckbox.IsChecked ?? false;
             var downloadLimelight = LimelightCheckbox.IsChecked ?? false;
