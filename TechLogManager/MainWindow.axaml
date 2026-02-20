@@ -10,7 +10,7 @@
         x:CompileBindings="True"
         WindowState="Maximized">
 
-    <Grid Margin="20" RowDefinitions="Auto,20,Auto,20,Auto,20,Auto,20,Auto,20,*,20,Auto">
+    <Grid Margin="10" RowDefinitions="Auto,20,Auto,20,Auto,20,Auto,20,Auto,*,Auto">
         <!-- Settings Button -->
         <Button Name="SettingsButton"
                 HorizontalAlignment="Right"
@@ -31,41 +31,34 @@
 
         <!-- Team Selection -->
         <StackPanel Grid.Row="0">
-            <TextBlock Text="Enter Your Team Number" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+            <TextBlock Text="Enter Your Team Number" FontSize="18" FontWeight="Bold" HorizontalAlignment="Left" />
             <TextBox Name="TeamNumberTextBox"
                      Width="200"
                      Height="40"
                      Margin="0,10,0,0"
                      FontSize="16"
-                     HorizontalAlignment="Center"
+                     HorizontalAlignment="Left"
                      TextAlignment="Center"
                      TextChanged="TeamNumberTextBox_TextChanged" />
-            <TextBlock Name="SelectedTeamText"
-                       Text="No team entered"
-                       HorizontalAlignment="Center"
-                       Margin="0,10,0,0" />
         </StackPanel>
 
         <!-- Path Selection -->
         <StackPanel Grid.Row="2">
-            <TextBlock Text="Folder name" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+            <TextBlock Text="Folder name" FontSize="18" FontWeight="Bold" HorizontalAlignment="Left" />
             <TextBox Name="DestinationFolderTextBox"
                      Width="200"
                      Height="40"
                      Margin="0,10,0,0"
                      FontSize="16"
-                     HorizontalAlignment="Center"
+                     HorizontalAlignment="Left"
                      TextAlignment="Center"
                      TextChanged="DestinationFolderTextBox_TextChanged" />
-            <TextBlock Name="DestinationFolderText"
-                       HorizontalAlignment="Center"
-                       Margin="0,10,0,0" />
         </StackPanel>
 
         <!-- Action Selection -->
         <StackPanel Grid.Row="4">
-            <TextBlock Text="Choose Operation" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+            <TextBlock Text="Choose Operation" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left" />
+            <StackPanel HorizontalAlignment="Left" Margin="0,10,0,0">
                 <RadioButton Name="DlAndDelRadio" Content="Download and Delete" GroupName="Action" IsChecked="True"
                              Margin="10,0" />
                 <RadioButton Name="DownloadRadio" Content="Download Only" GroupName="Action" Margin="10,0" />
@@ -75,8 +68,8 @@
 
         <!-- What to Download -->
         <StackPanel Grid.Row="6">
-            <TextBlock Text="What to Download" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
-            <StackPanel HorizontalAlignment="Center" Margin="0,10,0,0">
+            <TextBlock Text="What to Download" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left" />
+            <StackPanel HorizontalAlignment="Left" Margin="0,10,0,0">
                 <CheckBox Name="RoborioCheckbox" Content="RoboRIO Logs" IsChecked="True" />
                 <CheckBox Name="LimelightCheckbox" Content="Limelight Recordings" IsChecked="True" />
                 <CheckBox Name="DsLogsCheckbox" Content="Driver station logs" IsChecked="False" />
@@ -86,23 +79,16 @@
 
         <!-- How many -->
         <StackPanel Grid.Row="8">
-            <TextBlock Text="How many ?" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+            <TextBlock Text="How many ?" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
                 <RadioButton Name="AllRadio" Content="All" GroupName="Many" IsChecked="True" Margin="10,0" />
                 <RadioButton Name="LatestRadio" Content="Latest one" GroupName="Many" Margin="10,0" />
             </StackPanel>
         </StackPanel>
 
-        <!-- Log Output -->
-        <Border Grid.Row="10" BorderBrush="Gray" BorderThickness="1" Padding="10">
-            <ScrollViewer>
-                <TextBlock Name="LogOutput" TextWrapping="Wrap" FontFamily="Consolas" FontSize="12" />
-            </ScrollViewer>
-        </Border>
-
         <!-- Action Buttons -->
-        <StackPanel Grid.Row="12" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Name="StartButton" Content="Start" Width="120" Height="40" Click="StartButton_Click" Margin="5" />
+        <StackPanel Grid.Row="10" Orientation="Horizontal" HorizontalAlignment="Left">
+            <Button Name="StartButton" Content="Start" Width="120" Height="40" Click="StartButton_Click" />
             <Button Name="CommitButton" Content="Commit" Width="120" Height="40" Click="CommitButton_Click"
                     Margin="5" IsEnabled="False" />
         </StackPanel>

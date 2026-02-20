@@ -23,7 +23,7 @@ public partial class MainWindow : Window
         var date = DateTime.Now.ToString("yyyy-MM-dd-HH'h'mm");
         var i = SettingsManager.Instance;
         _realDestFolder = Path.Combine(i.RepositoryLocation, date);
-        DestinationFolderText.Text = _realDestFolder;
+        DestinationFolderTextBox.Text = date;
     }
 
     private async void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -36,16 +36,7 @@ public partial class MainWindow : Window
     {
         var teamNumber = TeamNumberTextBox.Text?.Trim();
 
-        if (ushort.TryParse(teamNumber, out _))
-        {
-            _selectedTeam = teamNumber;
-            SelectedTeamText.Text = $"Team {teamNumber} selected";
-        }
-        else
-        {
-            SelectedTeamText.Text = "No team entered";
-            _selectedTeam = null;
-        }
+        _selectedTeam = ushort.TryParse(teamNumber, out _) ? teamNumber : null;
     }
 
     private void DestinationFolderTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -65,7 +56,6 @@ public partial class MainWindow : Window
         try
         {
             _realDestFolder = Path.Combine(SettingsManager.Instance.RepositoryLocation, folderEnd);
-            DestinationFolderText.Text = _realDestFolder;
         }
         catch
         {
@@ -88,7 +78,6 @@ public partial class MainWindow : Window
         }
 
         StartButton.IsEnabled = false;
-        LogOutput.Text = "";
 
         try
         {
@@ -160,9 +149,8 @@ public partial class MainWindow : Window
         return 0;
     }
 
-    private void Log(string message)
+    private static void Log(string message)
     {
         Console.WriteLine(message);
-        Dispatcher.UIThread.Post(() => { LogOutput.Text += message + Environment.NewLine; });
     }
 }
