@@ -4,9 +4,11 @@
         Title="Settings"
         Width="450"
         Height="400"
-        WindowStartupLocation="CenterOwner"
         Icon="/Assets/icon.ico"
-        CanResize="False">
+        CanResize="False"
+        x:DataType="Window"
+        x:CompileBindings="True"
+        WindowStartupLocation="CenterOwner">
 
     <Grid Margin="20" RowDefinitions="*,Auto">
         <ScrollViewer Grid.Row="0">
