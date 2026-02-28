@@ -119,26 +119,54 @@ public partial class MainWindow : Window
 
             if (downloadLimelight)
             {
-                var entries = await LimelightProcessing.GetLogs(conn);
-                _allLogEntries.AddRange(entries);
+                try
+                {
+                    var entries = await LimelightProcessing.GetLogs(conn);
+                    _allLogEntries.AddRange(entries);
+                }
+                catch (Exception ex)
+                {
+                    Log($"Error downloading Limelight logs: {ex.Message}");
+                }
             }
             
             if (downloadRoborio)
             {
-                var entries = await RioProcessing.GetLogs(conn);
-                _allLogEntries.AddRange(entries);
+                try
+                {
+                    var entries = await RioProcessing.GetLogs(conn);
+                    _allLogEntries.AddRange(entries);
+                }
+                catch (Exception ex)
+                {
+                    Log($"Error downloading RoboRIO logs: {ex.Message}");
+                }
             }
             
             if (downloadDsLogs)
             {
-                var entries = DriverStationProcessing.GetLogs();
-                _allLogEntries.AddRange(entries);
+                try
+                {
+                    var entries = DriverStationProcessing.GetLogs();
+                    _allLogEntries.AddRange(entries);
+                }
+                catch (Exception ex)
+                {
+                    Log($"Error downloading Driver Station logs: {ex.Message}");
+                }
             }
             
             if (downloadHoot)
             {
-                var entries = await HootProcessing.ProcessLogs(_selectedTeam, conn);
-                _allLogEntries.AddRange(entries);
+                try
+                {
+                    var entries = await HootProcessing.ProcessLogs(_selectedTeam, conn);
+                    _allLogEntries.AddRange(entries);
+                }
+                catch (Exception ex)
+                {
+                    Log($"Error downloading Hoot logs: {ex.Message}");
+                }
             }
 
             // Populate the UI list
