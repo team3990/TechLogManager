@@ -9,7 +9,7 @@ public static class DriverStationProcessing
     {
         Log("Processing driver station logs...");
         var files = Directory.EnumerateFiles(@"C:\Users\Public\Documents\FRC\Log Files\DSLogs")
-            .OrderByDescending(File.GetLastWriteTime)
+            .OrderBy(File.GetLastWriteTime)
             .Select(it => it.Replace(".dslog", "").Replace(".dsevents", ""))
             .ToHashSet();
 
@@ -24,6 +24,6 @@ public static class DriverStationProcessing
                 }
                 if (action.IsDelete()) File.Delete(file);
                 return Task.CompletedTask;
-            })).ToList();
+            })).OrderBy(e => e.Name).ToList();
     }
 }

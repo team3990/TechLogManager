@@ -66,6 +66,6 @@ public static class RioProcessing
                     Log(result);
                 }
             }))
-            .ToList();
+            .OrderBy(e => e.Name).ToList();
     }
 }
