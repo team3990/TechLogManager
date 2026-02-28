@@ -44,11 +44,14 @@ public static class LimelightProcessing
                 if (action.IsDownload())
                 {
                     if (!string.IsNullOrEmpty(rec.Video))
-                        await conn.DownloadFileHttpAsync(rec.Video, dest.Combine(llname, "video.avi").CreateDirectory());
+                        await conn.DownloadFileHttpAsync(rec.Video, dest
+                            .Combine(llname).CreateDirectory().Combine("video.avi"));
                     if (!string.IsNullOrEmpty(rec.Manifest))
-                        await conn.DownloadFileHttpAsync(rec.Manifest, dest.Combine(llname, "manifest.jsonl").CreateDirectory());
+                        await conn.DownloadFileHttpAsync(rec.Manifest, dest
+                            .Combine(llname).CreateDirectory().Combine("manifest.jsonl"));
                     if (!string.IsNullOrEmpty(rec.Bootlog))
-                        await conn.DownloadFileHttpAsync(rec.Bootlog, dest.Combine(llname, "bootlog.txt.gz").CreateDirectory());
+                        await conn.DownloadFileHttpAsync(rec.Bootlog, dest
+                            .Combine(llname).CreateDirectory().Combine("bootlog.txt.gz"));
                 }
 
                 if (action.IsDelete())

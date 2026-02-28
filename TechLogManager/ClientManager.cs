@@ -9,6 +9,7 @@ public class ClientManager : IDisposable
     private readonly ScpClient _scpClient;
     private readonly SshClient _sshClient;
     private readonly string _teamNumber;
+    private bool _connected;
     private bool _disposed;
 
     public ClientManager(string teamNumber)
@@ -23,6 +24,7 @@ public class ClientManager : IDisposable
 
     public void Dispose()
     {
+        _connected = false;
         if (_disposed) return;
 
         try
@@ -47,6 +49,7 @@ public class ClientManager : IDisposable
 
     public async Task ConnectAsync()
     {
+        if (_connected) return;
         await Task.Run(() =>
         {
             _sshClient.Connect();
@@ -57,6 +60,7 @@ public class ClientManager : IDisposable
             if (!_scpClient.IsConnected)
                 throw new Exception($"Failed to connect SCP client to {GetRioHostname(_teamNumber)}");
         });
+        _connected = true;
     }
 
     public async Task<string> RunCommandAsync(string command)

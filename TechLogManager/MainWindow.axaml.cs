@@ -2,6 +2,7 @@
 using Avalonia.Interactivity;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Raphdf201.FileUtils;
 using static TechLogManager.Utils;
 
 namespace TechLogManager;
@@ -12,6 +13,7 @@ public partial class MainWindow : Window
     private string? _selectedTeam;
     private readonly ObservableCollection<LogEntryViewModel> _logEntries = [];
     private readonly List<LogEntry> _allLogEntries = [];
+    private ClientManager? _clientManager;
 
     public MainWindow()
     {
@@ -22,6 +24,14 @@ public partial class MainWindow : Window
         TeamNumberTextBox.Text = i.DefaultTeamNumber;
         
         LogListBox.ItemsSource = _logEntries;
+        
+        Closing += (_, _) => DisposeClientManager();
+    }
+
+    private void DisposeClientManager()
+    {
+        _clientManager?.Dispose();
+        _clientManager = null;
     }
 
     private void SetFolderPathDate()
@@ -34,6 +44,7 @@ public partial class MainWindow : Window
 
     private async void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
+        DisposeClientManager();
         var settingsWindow = new SettingsWindow();
         await settingsWindow.ShowDialog(this);
     }
@@ -87,7 +98,7 @@ public partial class MainWindow : Window
 
         try
         {
-            Directory.CreateDirectory(_realDestFolder);
+            _realDestFolder.CreateDirectory();
             var downloadRoborio = RoborioCheckbox.IsChecked ?? false;
             var downloadLimelight = LimelightCheckbox.IsChecked ?? false;
             var downloadDsLogs = DsLogsCheckbox.IsChecked ?? false;
@@ -106,11 +117,11 @@ public partial class MainWindow : Window
             _allLogEntries.Clear();
             _logEntries.Clear();
 
-            using var conn = new ClientManager(_selectedTeam);
+            _clientManager = new ClientManager(_selectedTeam);
 
             try
             {
-                await conn.ConnectAsync();
+                await _clientManager.ConnectAsync();
             }
             catch (Exception exception)
             {
@@ -121,7 +132,7 @@ public partial class MainWindow : Window
             {
                 try
                 {
-                    var entries = await LimelightProcessing.GetLogs(conn);
+                    var entries = await LimelightProcessing.GetLogs(_clientManager);
                     _allLogEntries.AddRange(entries);
                 }
                 catch (Exception ex)
@@ -134,7 +145,7 @@ public partial class MainWindow : Window
             {
                 try
                 {
-                    var entries = await RioProcessing.GetLogs(conn);
+                    var entries = await RioProcessing.GetLogs(_clientManager);
                     _allLogEntries.AddRange(entries);
                 }
                 catch (Exception ex)
@@ -160,7 +171,7 @@ public partial class MainWindow : Window
             {
                 try
                 {
-                    var entries = await HootProcessing.ProcessLogs(_selectedTeam, conn);
+                    var entries = await HootProcessing.ProcessLogs(_selectedTeam, _clientManager);
                     _allLogEntries.AddRange(entries);
                 }
                 catch (Exception ex)
