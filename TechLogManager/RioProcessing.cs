@@ -52,11 +52,12 @@ public static class RioProcessing
 
         Log($"Found {files.Count} RoboRIO log file(s)");
         
-        return files.Select(file => new LogEntry(file.Split("/")[^1], LogSource.RoboRio, async (dest, action) =>
+        return files.Select(file => new LogEntry(file.GetFileName()!, LogSource.RoboRio, async (dest, action) =>
             {
                 if (action.IsDownload())
                 {
-                    var result = await conn.DownloadFileScpAsync(file, dest.Combine("wpilog", File.GetName(file)).CreateDirectory());
+                    var result = await conn.DownloadFileScpAsync(file, dest
+                        .Combine("wpilog").CreateDirectory().Combine(file.GetFileName()!));
                     Log(result);
                 }
 

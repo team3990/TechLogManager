@@ -14,15 +14,20 @@ public static class DriverStationProcessing
             .ToHashSet();
 
         return (from file in files
-            let fname = file.Split(@"\")[^1]
+            let fname = file.GetFileName()!
             select new LogEntry(fname, LogSource.DriverStation, (dest, action) =>
             {
                 if (action.IsDownload())
                 {
-                    File.Copy($"{file}.dsevents", dest.Combine("dslogs".CreateDirectory(), fname));
-                    File.Copy($"{file}.dslog", dest.Combine("dslogs".CreateDirectory(), fname));
+                    File.Copy($"{file}.dsevents", dest.Combine("dslogs".CreateDirectory(), $"{fname}.dsevents"));
+                    File.Copy($"{file}.dslog", dest.Combine("dslogs".CreateDirectory(), $"{fname}.dslog"));
                 }
-                if (action.IsDelete()) File.Delete(file);
+
+                if (action.IsDelete())
+                {
+                    File.Delete(file + ".dslog");
+                    File.Delete(file + ".dsevents");
+                }
                 return Task.CompletedTask;
             })).OrderBy(e => e.Name).ToList();
     }
