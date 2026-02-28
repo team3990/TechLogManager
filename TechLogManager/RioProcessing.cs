@@ -56,7 +56,7 @@ public static class RioProcessing
             {
                 if (action.IsDownload())
                 {
-                    var result = await conn.DownloadFileScpAsync(file, dest.Combine(File.GetName(file)));
+                    var result = await conn.DownloadFileScpAsync(file, dest.Combine("wpilog", File.GetName(file)).CreateDirectory());
                     Log(result);
                 }
 

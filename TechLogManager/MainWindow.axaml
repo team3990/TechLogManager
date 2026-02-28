@@ -96,7 +96,7 @@
             <ListBox Grid.Row="4" Name="LogListBox" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="local:LogEntryViewModel">
-                        <Border BorderBrush="Gray" BorderThickness="1" Padding="10" Margin="5"
+                        <Border BorderBrush="Gray" BorderThickness="1" Padding="7.2, 6.8, 7.2, 6.8" Margin="-5"
                                 CornerRadius="5">
                             <Grid ColumnDefinitions="Auto,10,*,10,Auto,10,Auto">
                                 <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}" VerticalAlignment="Center" />
@@ -108,7 +108,7 @@
 
                                 <Button Grid.Column="4" Content="Download" Click="DownloadButton_Click"
                                         IsEnabled="{Binding !IsDownloading}" Width="100" />
-                                <Button Grid.Column="6" Content="Delete" Click="DeleteButton_Click"
+                                <Button Grid.Column="6" Content="Delete" Click="DeleteButton_Click" Foreground="Red"
                                         IsEnabled="{Binding !IsDeleting}" Width="100" />
                             </Grid>
                         </Border>

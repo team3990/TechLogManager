@@ -122,7 +122,7 @@ public partial class MainWindow : Window
             
             if (downloadDsLogs)
             {
-                var entries = DriverStationProcessing.GetLogs(conn);
+                var entries = DriverStationProcessing.GetLogs();
                 _allLogEntries.AddRange(entries);
             }
             
@@ -174,7 +174,7 @@ public partial class MainWindow : Window
         }
     }
 
-    internal async Task DownloadLog(LogEntryViewModel viewModel)
+    private async Task DownloadLog(LogEntryViewModel viewModel)
     {
         if (_realDestFolder == null) return;
         
@@ -196,7 +196,7 @@ public partial class MainWindow : Window
         }
     }
 
-    internal async Task DeleteLog(LogEntryViewModel viewModel)
+    private async Task DeleteLog(LogEntryViewModel viewModel)
     {
         try
         {

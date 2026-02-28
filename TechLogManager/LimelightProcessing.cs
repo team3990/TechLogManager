@@ -1,3 +1,4 @@
+using Raphdf201.FileUtils;
 using static TechLogManager.Utils;
 
 namespace TechLogManager;
@@ -43,11 +44,11 @@ public static class LimelightProcessing
                 if (action.IsDownload())
                 {
                     if (!string.IsNullOrEmpty(rec.Video))
-                        await conn.DownloadFileHttpAsync(rec.Video, Path.Combine(dest, "video.avi"));
+                        await conn.DownloadFileHttpAsync(rec.Video, dest.Combine(llname, "video.avi").CreateDirectory());
                     if (!string.IsNullOrEmpty(rec.Manifest))
-                        await conn.DownloadFileHttpAsync(rec.Manifest, Path.Combine(dest, "manifest.jsonl"));
+                        await conn.DownloadFileHttpAsync(rec.Manifest, dest.Combine(llname, "manifest.jsonl").CreateDirectory());
                     if (!string.IsNullOrEmpty(rec.Bootlog))
-                        await conn.DownloadFileHttpAsync(rec.Bootlog, Path.Combine(dest, "bootlog.txt.gz"));
+                        await conn.DownloadFileHttpAsync(rec.Bootlog, dest.Combine(llname, "bootlog.txt.gz").CreateDirectory());
                 }
 
                 if (action.IsDelete())
