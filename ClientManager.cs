@@ -9,14 +9,12 @@ public class ClientManager : IDisposable
     private readonly ScpClient _scpClient;
     private readonly SshClient _sshClient;
     private readonly string _teamNumber;
-    private bool _connected;
     private bool _disposed;
 
     public ClientManager(string teamNumber)
     {
-        _teamNumber = teamNumber;
         var hostname = GetRioHostname(teamNumber);
-
+        _teamNumber = teamNumber;
         _sshClient = new SshClient(hostname, "lvuser", "");
         _scpClient = new ScpClient(hostname, "lvuser", "");
         _httpClient = new HttpClient();
@@ -24,43 +22,32 @@ public class ClientManager : IDisposable
 
     public void Dispose()
     {
-        _connected = false;
         if (_disposed) return;
-
-        try
-        {
-            if (_sshClient.IsConnected)
-                _sshClient.Disconnect();
-
-            if (_scpClient.IsConnected)
-                _scpClient.Disconnect();
-
-            _httpClient.Dispose();
-            _sshClient.Dispose();
-            _scpClient.Dispose();
-        }
-        catch
-        {
-            // ignored
-        }
-
+        _httpClient.Dispose();
+        _sshClient.Dispose();
+        _scpClient.Dispose();
         _disposed = true;
+        GC.SuppressFinalize(this);
     }
 
-    public async Task ConnectAsync()
+    public async Task ConnectAsync(bool ssh, bool scp)
     {
-        if (_connected) return;
         await Task.Run(() =>
         {
-            _sshClient.Connect();
-            if (!_sshClient.IsConnected)
-                throw new Exception($"Failed to connect SSH client to {GetRioHostname(_teamNumber)}");
+            if (ssh)
+            {
+                _sshClient.Connect();
+                if (!_sshClient.IsConnected)
+                    throw new Exception($"Failed to connect SSH client to {GetRioHostname(_teamNumber)}");
+            }
 
-            _scpClient.Connect();
-            if (!_scpClient.IsConnected)
-                throw new Exception($"Failed to connect SCP client to {GetRioHostname(_teamNumber)}");
+            if (scp)
+            {
+                _scpClient.Connect();
+                if (!_scpClient.IsConnected)
+                    throw new Exception($"Failed to connect SCP client to {GetRioHostname(_teamNumber)}");
+            }
         });
-        _connected = true;
     }
 
     public async Task<string> RunCommandAsync(string command)

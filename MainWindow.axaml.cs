@@ -121,7 +121,9 @@ public partial class MainWindow : Window
 
             try
             {
-                await _clientManager.ConnectAsync();
+                await _clientManager.ConnectAsync(
+                    downloadRoborio || downloadLimelight || downloadHoot,
+                    downloadRoborio || downloadHoot);
             }
             catch (Exception exception)
             {
