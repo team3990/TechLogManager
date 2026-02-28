@@ -17,7 +17,7 @@ public static class DriverStationProcessing
             filesl[i] = newfname;
         }
         var files = filesl.AsEnumerable()
-            .OrderBy(File.GetLastWriteTime)
+            .OrderByDescending(File.GetLastWriteTime)
             .Select(it => it.Replace(".dslog", "").Replace(".dsevents", ""))
             .ToHashSet();
 

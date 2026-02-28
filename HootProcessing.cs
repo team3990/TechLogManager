@@ -60,6 +60,6 @@ public static class HootProcessing
                 await conn.DownloadFileScpAsync(file, dest.Combine("hoot").CreateDirectory().Combine(file.GetFileName()!));
             if (action.IsDelete())
                 await conn.RunCommandAsync($"rm -f {file}");
-        })).OrderBy(e => e.Name).ToList();
+        })).OrderByDescending(e => e.Name).ToList();
     }
 }

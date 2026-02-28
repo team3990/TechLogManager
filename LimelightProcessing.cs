@@ -57,6 +57,6 @@ public static class LimelightProcessing
                 if (action.IsDelete())
                     await rec.Delete();
             });
-        }).ToList();
+        }).ToList().Reversed();
     }
 }

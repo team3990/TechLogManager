@@ -62,6 +62,13 @@ public static class Utils
             return action is Action.Delete or Action.DownloadAndDelete;
         }
     }
+    
+    public static List<T> Reversed<T>(this List<T> list)
+    {
+        var copy = new List<T>(list);
+        copy.Reverse();
+        return copy;
+    }
 
     public static void Log(string message)
     {
