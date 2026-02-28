@@ -55,7 +55,7 @@
             <!-- Action Buttons -->
             <StackPanel Grid.Row="10" Orientation="Horizontal" HorizontalAlignment="Left">
                 <Button Name="StartButton" Content="Discover Logs" Width="140" Height="40" Click="StartButton_Click" />
-                <Button Name="CommitButton" Content="Commit" Width="120" Height="40" Click="CommitButton_Click"
+                <Button Name="FilterButton" Content="Filter" Width="120" Height="40" Click="FilterButton_Click"
                         Margin="5" IsEnabled="False" />
             </StackPanel>
         </Grid>
@@ -97,7 +97,7 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="local:LogEntryViewModel">
                         <Border BorderBrush="Gray" BorderThickness="1" Padding="7.2, 6.8, 7.2, 6.8" Margin="-5"
-                                CornerRadius="5">
+                                CornerRadius="5" IsVisible="{Binding IsVisible}">
                             <Grid ColumnDefinitions="Auto,10,*,10,Auto,10,Auto">
                                 <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}" VerticalAlignment="Center" />
 

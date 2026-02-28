@@ -172,13 +172,13 @@ public partial class MainWindow : Window
             // Populate the UI list
             foreach (var entry in _allLogEntries)
             {
-                _logEntries.Add(new LogEntryViewModel(entry, this));
+                _logEntries.Add(new LogEntryViewModel(entry));
             }
 
             Log("");
             Log($"Found {_allLogEntries.Count} log(s)!");
 
-            CommitButton.IsEnabled = true;
+            FilterButton.IsEnabled = true;
         }
         catch (Exception ex)
         {
@@ -191,23 +191,40 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void CommitButton_Click(object? sender, RoutedEventArgs e)
+    private async void FilterButton_Click(object? sender, RoutedEventArgs e)
     {
         try
         {
-            CommitButton.IsEnabled = false;
-            Log("Committing to git...");
-            GitOperations.GitCommit(SettingsManager.Instance.RepositoryLocation, DateTime.Now.ToLongDateString());
-            Log("Git commit successful!");
+            FilterButton.IsEnabled = false;
+            Log("Filtering logs...");
+            
+            var downloadRoborio = RoborioCheckbox.IsChecked ?? false;
+            var downloadLimelight = LimelightCheckbox.IsChecked ?? false;
+            var downloadDsLogs = DsLogsCheckbox.IsChecked ?? false;
+            var downloadHoot = HootCheckbox.IsChecked ?? false;
+            
+            var visibleCount = 0;
+            foreach (var entry in _logEntries)
+            {
+                entry.IsVisible = (downloadRoborio && entry.Source == "RoboRio") ||
+                                 (downloadLimelight && entry.Source == "Limelight") ||
+                                 (downloadDsLogs && entry.Source == "DriverStation") ||
+                                 (downloadHoot && entry.Source == "Hoot");
+                
+                if (entry.IsVisible)
+                    visibleCount++;
+            }
+            
+            Log($"Filtered to show {visibleCount} log(s)!");
         }
         catch (Exception ex)
         {
-            Log($"Git commit failed: {ex.Message}");
-            await this.ShowMessageDialog("Error", $"Git commit failed: {ex.Message}");
+            Log($"Filter failed: {ex.Message}");
+            await this.ShowMessageDialog("Error", $"Filter failed: {ex.Message}");
         }
         finally
         {
-            CommitButton.IsEnabled = true;
+            FilterButton.IsEnabled = true;
         }
     }
 
@@ -338,9 +355,10 @@ public class LogEntryViewModel : ObservableObject
 {
     public readonly LogEntry Entry;
 
-    public LogEntryViewModel(LogEntry entry, MainWindow mainWindow)
+    public LogEntryViewModel(LogEntry entry)
     {
         Entry = entry;
+        IsVisible = true;
     }
 
     public string Name => Entry.Name;
@@ -359,6 +377,12 @@ public class LogEntryViewModel : ObservableObject
     }
 
     public bool IsDeleting
+    {
+        get;
+        set => SetProperty(ref field, value);
+    }
+
+    public bool IsVisible
     {
         get;
         set => SetProperty(ref field, value);
