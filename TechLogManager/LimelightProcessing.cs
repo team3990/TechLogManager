@@ -35,20 +35,24 @@ public static class LimelightProcessing
 
         var recs = await LimelightUtils.GetRecordingsAsync(llname);
 
-        return recs.Select(rec => new LogEntry(rec.Name, LogSource.Limelight, async (dest, action) =>
+        return recs.Select(rec =>
         {
-            if (action.IsDownload())
+            rec.GetLinks(); // Convert file names to full URLs
+            return new LogEntry(rec.Name, LogSource.Limelight, async (dest, action) =>
             {
-                if (!string.IsNullOrEmpty(rec.Video))
-                    await conn.DownloadFileHttpAsync(rec.Video, Path.Combine(dest, "video.avi"));
-                if (!string.IsNullOrEmpty(rec.Manifest))
-                    await conn.DownloadFileHttpAsync(rec.Manifest, Path.Combine(dest, "manifest.jsonl"));
-                if (!string.IsNullOrEmpty(rec.Bootlog))
-                    await conn.DownloadFileHttpAsync(rec.Bootlog, Path.Combine(dest, "bootlog.txt.gz"));
-            }
+                if (action.IsDownload())
+                {
+                    if (!string.IsNullOrEmpty(rec.Video))
+                        await conn.DownloadFileHttpAsync(rec.Video, Path.Combine(dest, "video.avi"));
+                    if (!string.IsNullOrEmpty(rec.Manifest))
+                        await conn.DownloadFileHttpAsync(rec.Manifest, Path.Combine(dest, "manifest.jsonl"));
+                    if (!string.IsNullOrEmpty(rec.Bootlog))
+                        await conn.DownloadFileHttpAsync(rec.Bootlog, Path.Combine(dest, "bootlog.txt.gz"));
+                }
 
-            if (action.IsDelete())
-                await rec.Delete();
-        })).ToList();
+                if (action.IsDelete())
+                    await rec.Delete();
+            });
+        }).ToList();
     }
 }
