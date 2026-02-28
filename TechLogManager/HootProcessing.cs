@@ -54,7 +54,7 @@ public static class HootProcessing
 
         Log($"Found {files.Count} hoot log file(s)");
 
-        return files.Select(file => new LogEntry(file.GetFileName()!, LogSource.Hoot, async (dest, action) =>
+        return files.Select(file => new LogEntry(file.Split("/")[^1], LogSource.Hoot, async (dest, action) =>
         {
             if (action.IsDownload())
                 await conn.DownloadFileScpAsync(file, dest.Combine("hoot", file.GetFileName()!).CreateDirectory());

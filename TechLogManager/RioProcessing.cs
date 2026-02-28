@@ -52,7 +52,7 @@ public static class RioProcessing
 
         Log($"Found {files.Count} RoboRIO log file(s)");
         
-        return files.Select(file => new LogEntry(file.GetFileName()!, LogSource.RoboRio, async (dest, action) =>
+        return files.Select(file => new LogEntry(file.Split("/")[^1], LogSource.RoboRio, async (dest, action) =>
             {
                 if (action.IsDownload())
                 {
