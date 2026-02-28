@@ -1,6 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Threading;
+using static TechLogManager.Utils;
 
 namespace TechLogManager;
 
@@ -100,10 +100,12 @@ public partial class MainWindow : Window
             Log($"Action: {action}");
             Log("");
 
-            if (downloadLimelight) await ProcessLimelightLogs(_selectedTeam, action, all, _realDestFolder);
-            if (downloadRoborio) await ProcessRoborioLogs(_selectedTeam, action, all, _realDestFolder);
-            if (downloadDsLogs) ProcessDsLogs(action, all, _realDestFolder);
-            if (downloadHoot) await ProcessHootLogs(_selectedTeam, action, all, _realDestFolder);
+            using var conn = new ClientManager(_selectedTeam);
+
+            if (downloadLimelight) await LimelightProcessing.GetLogs(conn);
+            if (downloadRoborio) await RioProcessing.GetLogs(conn);
+            if (downloadDsLogs) DriverStationProcessing.GetLogs(conn);
+            if (downloadHoot) await HootProcessing.ProcessLogs(_selectedTeam, conn);
 
             Log("");
             Log("Operations completed!");
@@ -147,10 +149,5 @@ public partial class MainWindow : Window
         if (DownloadRadio.IsChecked == true) return 1; // Download only
         if (DeleteRadio.IsChecked == true) return 2; // Delete only
         return 0;
-    }
-
-    private static void Log(string message)
-    {
-        Console.WriteLine(message);
     }
 }

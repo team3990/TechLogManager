@@ -1,32 +1,20 @@
 using Raphdf201.FileUtils;
+using static TechLogManager.Utils;
 
 namespace TechLogManager;
 
-public partial class MainWindow
+public static class HootProcessing
 {
-    private async Task ProcessHootLogs(string teamNumber, Action action, bool all, string destination)
+    public static async Task<List<LogEntry>> ProcessLogs(string teamNumber, ClientManager conn)
     {
         Log("Processing ctre (hoot) logs...");
-
-        using var connection = new ClientManager(teamNumber);
-
-        try
-        {
-            await connection.ConnectAsync();
-            Log("Connected to RoboRIO");
-        }
-        catch (Exception ex)
-        {
-            Log($"Failed to connect to RoboRIO: {ex.Message}");
-            return;
-        }
 
         string? f1;
         string? f2;
 
         try
         {
-            var results = await connection.RunCommandsAsync(
+            var results = await conn.RunCommandsAsync(
                 "find /home/lvuser/logs -name '*.hoot' 2>/dev/null || true",
                 "find /U/logs -name '*.hoot' 2>/dev/null || true"
             );
@@ -36,7 +24,7 @@ public partial class MainWindow
         catch (Exception ex)
         {
             Log($"Error finding hoot files: {ex.Message}");
-            return;
+            return [];
         }
 
         if (f1.IsWhiteSpace()) f1 = null;
@@ -44,7 +32,7 @@ public partial class MainWindow
         if (f1 == null && f2 == null)
         {
             Log("No hoot log files found");
-            return;
+            return [];
         }
 
         var files = f1 == null
@@ -58,7 +46,7 @@ public partial class MainWindow
         if (files.Count == 0)
         {
             Log("No valid hoot log files found");
-            return;
+            return [];
         }
 
         files.Sort((a, b) =>
@@ -66,51 +54,12 @@ public partial class MainWindow
 
         Log($"Found {files.Count} hoot log file(s)");
 
-        if (action.IsDownload())
+        return files.Select(file => new LogEntry(file.GetFileName()!, LogSource.Hoot, async (dest, action) =>
         {
-            if (all)
-            {
-                // Download all files using the same connection
-                Log($"Downloading {files.Count} file(s)...");
-                var downloadTasks = files.Select(file =>
-                    (remotePath: file, localPath: Path.Combine(destination, File.GetName(file)))
-                ).ToList();
-
-                var results = await connection.DownloadFilesScpAsync(downloadTasks);
-                foreach (var result in results) Log(result);
-            }
-            else
-            {
-                // Download only the latest file
-                var file = files[^1];
-                Log($"Downloading latest file: {File.GetName(file)}");
-                await connection.DownloadFileHttpAsync(file, Path.Combine(destination, File.GetName(file)));
-            }
-        }
-
-        if (action.IsDelete())
-        {
-            if (all)
-            {
-                Log("Deleting all hoot log files...");
-                await connection.RunCommandsAsync(
-                    GetHootDeleteScript("/home/lvuser/logs"),
-                    GetHootDeleteScript("/U/logs")
-                );
-                Log("All hoot log files deleted");
-            }
-            else
-            {
-                Log($"Deleting latest file: {File.GetName(files[^1])}");
-                await connection.RunCommandAsync($"rm -rf {Path.GetDirectoryName(files[^1])}");
-                Log("Latest hoot log file deleted");
-            }
-        }
-    }
-
-    private static string GetHootDeleteScript(string dir)
-    {
-        return
-            $"cd {dir} && find . -depth -type d | while read -r dir; do [ \"$dir\" = \".\" ] && continue; if [ -z \"$(ls -A \"$dir\")\" ]; then rmdir \"$dir\"; continue; fi; total_files=$(find \"$dir\" -maxdepth 1 -type f | wc -l); hoot_files=$(find \"$dir\" -maxdepth 1 -type f -name \"*.hoot\" | wc -l); if [ \"$total_files\" -gt 0 ] && [ \"$total_files\" -eq \"$hoot_files\" ]; then rm -rf \"$dir\"; elif [ \"$hoot_files\" -gt 0 ]; then find \"$dir\" -maxdepth 1 -type f -name \"*.hoot\" -delete; fi; done 2>/dev/null || true";
+            if (action.IsDownload())
+                await conn.DownloadFileScpAsync(file, dest.Combine(file.GetFileName()!));
+            if (action.IsDelete())
+                await conn.RunCommandAsync($"rm -f {file}");
+        })).ToList();
     }
 }

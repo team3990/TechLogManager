@@ -62,9 +62,14 @@ public static class Utils
             return action is Action.Delete or Action.DownloadAndDelete;
         }
     }
+
+    public static void Log(string message)
+    {
+        Console.WriteLine(message);
+    }
 }
 
-internal enum Action
+public enum Action
 {
     DownloadAndDelete,
     Download,

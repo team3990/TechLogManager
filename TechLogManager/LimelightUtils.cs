@@ -49,10 +49,10 @@ namespace LimelightClasses
     public class RecordingDetail(string name, string limelightName) : IDisposable
     {
         private readonly HttpClient _client = new();
-        private readonly string llname = limelightName;
-        public string video { get; set; } = name + ".avi";
-        public string manifest { get; set; } = name + "_manifest.jsonl";
-        public string bootlog { get; set; } = name + "_bootlog.txt.gz";
+        public string Video { get; private set; } = name + ".avi";
+        public string Manifest { get; private set; } = name + "_manifest.jsonl";
+        public string Bootlog { get; private set; } = name + "_bootlog.txt.gz";
+        public readonly string Name = limelightName + "_" + name;
 
         public void Dispose()
         {
@@ -61,18 +61,18 @@ namespace LimelightClasses
 
         public RecordingDetail GetLinks()
         {
-            var baseLink = $"http://{llname}.local:5807/recording/";
+            var baseLink = $"http://{limelightName}.local:5807/recording/";
 
-            video = baseLink + video;
-            manifest = baseLink + manifest;
-            bootlog = baseLink + bootlog;
+            Video = baseLink + Video;
+            Manifest = baseLink + Manifest;
+            Bootlog = baseLink + Bootlog;
 
             return this;
         }
 
         public async Task Delete()
         {
-            var response = await _client.DeleteAsync($"http://{llname}.local:5807/delete-video?name={video}");
+            var response = await _client.DeleteAsync($"http://{limelightName}.local:5807/delete-video?name={Video}");
             response.EnsureSuccessStatusCode();
             Dispose();
         }

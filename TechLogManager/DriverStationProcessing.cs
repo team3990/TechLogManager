@@ -1,33 +1,27 @@
 ﻿using Raphdf201.FileUtils;
+using static TechLogManager.Utils;
 
 namespace TechLogManager;
 
-public partial class MainWindow
+public static class DriverStationProcessing
 {
-    private void ProcessDsLogs(Action action, bool all, string destination)
+    public static List<LogEntry> GetLogs(ClientManager conn)
     {
         Log("Processing driver station logs...");
         var files = Directory.EnumerateFiles(@"C:\Users\Public\Documents\FRC\Log Files\DSLogs");
-        var rDest = Path.Combine(destination, "dslog");
-        Directory.CreateDirectory(rDest);
+        files = files.OrderByDescending(File.GetLastWriteTime);
 
-        if (all)
-        {
-            foreach (var file in files)
+        return (from file in files
+            let fname = file.GetFileName()!
+            select new LogEntry(fname, LogSource.DriverStation, (dest, action) =>
             {
-                Log($"Processing file {file}");
-                if (action.IsDownload()) File.Copy(file, Path.Combine(rDest, file.GetFileName()!));
-                if (action.IsDelete()) File.Delete(file);
-            }
-        }
-        else
-        {
-            var latestFile = files.OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
+                var rDest = Path.Combine(dest, "dslog");
+                Directory.CreateDirectory(rDest);
 
-            if (latestFile == null) return;
-            Log($"Processing file {latestFile}");
-            if (action.IsDownload()) File.Copy(latestFile, Path.Combine(rDest, latestFile.GetFileName()!));
-            if (action.IsDelete()) File.Delete(latestFile);
-        }
+                if (action.IsDownload()) File.Copy(file, Path.Combine(rDest, fname));
+                if (action.IsDelete()) File.Delete(file);
+
+                return Task.CompletedTask;
+            })).ToList();
     }
 }

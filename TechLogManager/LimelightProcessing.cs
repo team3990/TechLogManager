@@ -1,130 +1,54 @@
+using static TechLogManager.Utils;
+
 namespace TechLogManager;
 
-public partial class MainWindow
+public static class LimelightProcessing
 {
-    private async Task ProcessLimelightLogs(string teamNumber, Action action, bool all, string destination)
+    public static async Task<List<LogEntry>> GetLogs(ClientManager conn)
     {
         Log("Processing Limelight logs...");
 
-        // Use a single connection for getting the limelight list
-        using var connection = new ClientManager(teamNumber);
-
+        var entries = new List<LogEntry>();
         try
         {
-            await connection.ConnectAsync();
-            Log("Connected to RoboRIO");
-        }
-        catch (Exception ex)
-        {
-            Log($"Failed to connect to RoboRIO: {ex.Message}");
-            return;
-        }
+            var limelightsJson = await conn.RunCommandAsync("cat /home/lvuser/limelights.json");
 
-        try
-        {
-            var limelightsJson = await connection.RunCommandAsync("cat /home/lvuser/limelights.json");
-
-            var limelights = Utils.ParseJsonStringList(limelightsJson) ??
+            var limelights = ParseJsonStringList(limelightsJson) ??
                              throw new FileNotFoundException("Failed to get limelight list");
             Log($"Found {limelights.Count} Limelight(s): {string.Join(", ", limelights)}");
 
             foreach (var llname in limelights)
-                await ProcessSingleLimelight(action, all, llname, Path.Combine(destination, llname), connection);
+                entries.AddRange(await ProcessSingleLimelight(llname, conn));
         }
         catch (Exception ex)
         {
             Log($"Limelight error: {ex.Message}");
             throw;
         }
+
+        return entries;
     }
 
-    private async Task ProcessSingleLimelight(Action action, bool all, string llname, string destination,
-        ClientManager manager)
+    private static async Task<List<LogEntry>> ProcessSingleLimelight(string llname, ClientManager conn)
     {
-        Log($"Processing Limelight: {llname}");
+        Log($"Processing {llname}");
+
         var recs = await LimelightUtils.GetRecordingsAsync(llname);
-        Log($"Found {recs.Count} recording(s)");
 
-        if (action.IsDownload())
+        return recs.Select(rec => new LogEntry(rec.Name, LogSource.Limelight, async (dest, action) =>
         {
-            if (all)
+            if (action.IsDownload())
             {
-                for (var i = 0; i < recs.Count; i++)
-                {
-                    var folderName = Path.Combine(destination, $"rec{i + 1}");
-                    Directory.CreateDirectory(folderName);
-
-                    var links = recs[i].GetLinks();
-
-                    // Download video
-                    if (!string.IsNullOrEmpty(links.video))
-                    {
-                        Log($"  Downloading video {i + 1}...");
-                        await manager.DownloadFileHttpAsync(links.video, Path.Combine(folderName, "video.avi"));
-                    }
-
-                    // Download manifest
-                    if (!string.IsNullOrEmpty(links.manifest))
-                    {
-                        Log($"  Downloading manifest {i + 1}...");
-                        await manager.DownloadFileHttpAsync(links.manifest, Path.Combine(folderName, "manifest.jsonl"));
-                    }
-
-                    // Download bootlog
-                    if (!string.IsNullOrEmpty(links.bootlog))
-                    {
-                        Log($"  Downloading bootlog {i + 1}...");
-                        await manager.DownloadFileHttpAsync(links.bootlog, Path.Combine(folderName, "bootlog.txt.gz"));
-                    }
-
-                    Log($"  Downloaded to {folderName}");
-                }
+                if (!string.IsNullOrEmpty(rec.Video))
+                    await conn.DownloadFileHttpAsync(rec.Video, Path.Combine(dest, "video.avi"));
+                if (!string.IsNullOrEmpty(rec.Manifest))
+                    await conn.DownloadFileHttpAsync(rec.Manifest, Path.Combine(dest, "manifest.jsonl"));
+                if (!string.IsNullOrEmpty(rec.Bootlog))
+                    await conn.DownloadFileHttpAsync(rec.Bootlog, Path.Combine(dest, "bootlog.txt.gz"));
             }
-            else
-            {
-                var folderName = Path.Combine(destination, "rec");
-                Directory.CreateDirectory(folderName);
 
-                var links = recs[^1].GetLinks();
-
-                // Download video
-                if (!string.IsNullOrEmpty(links.video))
-                {
-                    Log("  Downloading video...");
-                    await manager.DownloadFileHttpAsync(links.video, Path.Combine(folderName, "video.avi"));
-                }
-
-                // Download manifest
-                if (!string.IsNullOrEmpty(links.manifest))
-                {
-                    Log("  Downloading manifest...");
-                    await manager.DownloadFileHttpAsync(links.manifest, Path.Combine(folderName, "manifest.jsonl"));
-                }
-
-                // Download bootlog
-                if (!string.IsNullOrEmpty(links.bootlog))
-                {
-                    Log("  Downloading bootlog...");
-                    await manager.DownloadFileHttpAsync(links.bootlog, Path.Combine(folderName, "bootlog.txt.gz"));
-                }
-
-                Log($"  Downloaded to {folderName}");
-            }
-        }
-
-        if (action.IsDelete())
-        {
-            if (all)
-            {
-                Log($"Deleting videos from {llname}...");
-                await LimelightUtils.DeleteAllVideosAsync(llname);
-                Log($"Videos deleted from {llname}");
-            }
-            else
-            {
-                Log($"Deleting latest video from {llname}...");
-                await recs[^1].Delete();
-            }
-        }
+            if (action.IsDelete())
+                await rec.Delete();
+        })).ToList();
     }
 }

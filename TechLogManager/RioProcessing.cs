@@ -1,32 +1,18 @@
 using Raphdf201.FileUtils;
+using static TechLogManager.Utils;
 
 namespace TechLogManager;
 
-public partial class MainWindow
+public static class RioProcessing
 {
-    private async Task ProcessRoborioLogs(string teamNumber, Action action, bool all, string destination)
+    public static async Task<List<LogEntry>> GetLogs(ClientManager conn)
     {
-        Log("Processing RoboRIO logs...");
-
-        using var connection = new ClientManager(teamNumber);
-
-        try
-        {
-            await connection.ConnectAsync();
-            Log("Connected to RoboRIO");
-        }
-        catch (Exception ex)
-        {
-            Log($"Failed to connect to RoboRIO: {ex.Message}");
-            return;
-        }
-
         string? f1;
         string? f2;
 
         try
         {
-            var results = await connection.RunCommandsAsync(
+            var results = await conn.RunCommandsAsync(
                 "find /home/lvuser/logs -name '*.wpilog' 2>/dev/null || true",
                 "find /U/logs -name '*.wpilog' 2>/dev/null || true"
             );
@@ -36,7 +22,7 @@ public partial class MainWindow
         catch (Exception ex)
         {
             Log($"Error finding log files: {ex.Message}");
-            return;
+            return [];
         }
 
         if (f1.IsWhiteSpace()) f1 = null;
@@ -44,7 +30,7 @@ public partial class MainWindow
         if (f1 == null && f2 == null)
         {
             Log("No RoboRIO log files found");
-            return;
+            return [];
         }
 
         var files = f1 == null
@@ -58,53 +44,28 @@ public partial class MainWindow
         if (files.Count == 0)
         {
             Log("No valid RoboRIO log files found");
-            return;
+            return [];
         }
 
         files.Sort((a, b) =>
             string.Compare(File.GetName(a), File.GetName(b), StringComparison.OrdinalIgnoreCase));
 
         Log($"Found {files.Count} RoboRIO log file(s)");
+        
+        return files.Select(file => new LogEntry(file.GetFileName()!, LogSource.RoboRio, async (dest, action) =>
+            {
+                if (action.IsDownload())
+                {
+                    var result = await conn.DownloadFileScpAsync(file, dest.Combine(File.GetName(file)));
+                    Log(result);
+                }
 
-        if (action.IsDownload())
-        {
-            if (all)
-            {
-                Log($"Downloading {files.Count} file(s)...");
-                var downloadTasks = files.Select(file =>
-                    (remotePath: file, localPath: Path.Combine(destination, File.GetName(file)))
-                ).ToList();
-
-                var results = await connection.DownloadFilesScpAsync(downloadTasks);
-                foreach (var result in results) Log(result);
-            }
-            else
-            {
-                // Download only the latest file
-                var file = files[^1];
-                Log($"Downloading latest file: {File.GetName(file)}");
-                var result = await connection.DownloadFileScpAsync(file, Path.Combine(destination, File.GetName(file)));
-                Log(result);
-            }
-        }
-
-        if (action.IsDelete())
-        {
-            if (all)
-            {
-                Log("Deleting all RoboRIO log files...");
-                await connection.RunCommandsAsync(
-                    "rm -f /home/lvuser/logs/*.wpilog 2>/dev/null || true",
-                    "rm -f /U/logs/*.wpilog 2>/dev/null || true"
-                );
-                Log("All RoboRIO log files deleted");
-            }
-            else
-            {
-                Log($"Deleting latest file: {File.GetName(files[^1])}");
-                await connection.RunCommandAsync($"rm -f {files[^1]}");
-                Log("Latest RoboRIO log file deleted");
-            }
-        }
+                if (action.IsDelete())
+                {
+                    var result = await conn.RunCommandAsync($"rm -f {file}");
+                    Log(result);
+                }
+            }))
+            .ToList();
     }
 }
