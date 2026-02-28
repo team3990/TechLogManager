@@ -49,20 +49,13 @@ public class ClientManager : IDisposable
     {
         await Task.Run(() =>
         {
-            try
-            {
-                _sshClient.Connect();
-                if (!_sshClient.IsConnected)
-                    throw new Exception($"Failed to connect SSH client to {GetRioHostname(_teamNumber)}");
+            _sshClient.Connect();
+            if (!_sshClient.IsConnected)
+                throw new Exception($"Failed to connect SSH client to {GetRioHostname(_teamNumber)}");
 
-                _scpClient.Connect();
-                if (!_scpClient.IsConnected)
-                    throw new Exception($"Failed to connect SCP client to {GetRioHostname(_teamNumber)}");
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Connection failed: {ex.GetType().Name} {ex.Message}", ex);
-            }
+            _scpClient.Connect();
+            if (!_scpClient.IsConnected)
+                throw new Exception($"Failed to connect SCP client to {GetRioHostname(_teamNumber)}");
         });
     }
 

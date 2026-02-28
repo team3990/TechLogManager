@@ -108,6 +108,15 @@ public partial class MainWindow : Window
 
             using var conn = new ClientManager(_selectedTeam);
 
+            try
+            {
+                await conn.ConnectAsync();
+            }
+            catch (Exception exception)
+            {
+                await this.ShowMessageDialog("Error", $"Could not connect to roborio : {exception.Message}");
+            }
+
             if (downloadLimelight)
             {
                 var entries = await LimelightProcessing.GetLogs(conn);
