@@ -55,8 +55,6 @@
             <!-- Action Buttons -->
             <StackPanel Grid.Row="10" Orientation="Horizontal" HorizontalAlignment="Left">
                 <Button Name="StartButton" Content="Discover Logs" Width="140" Height="40" Click="StartButton_Click" />
-                <Button Name="FilterButton" Content="Filter" Width="120" Height="40" Click="FilterButton_Click"
-                        Margin="5" IsEnabled="False" />
             </StackPanel>
         </Grid>
 
@@ -90,6 +88,16 @@
                 <Button Name="DeleteSelectedButton" Content="Delete Selected" Click="DeleteSelectedButton_Click" />
                 <Button Name="DownloadAllButton" Content="Download All" Click="DownloadAllButton_Click" />
                 <Button Name="DeleteAllButton" Content="Delete All" Click="DeleteAllButton_Click" />
+                <DropDownButton Name="FilterButton" Content="Filter">
+                    <DropDownButton.Flyout>
+                        <MenuFlyout Closed="FilterFlyout_Closed">
+                            <CheckBox Name="RoborioFilterCheckbox" Content="RoboRIO Logs" IsChecked="True" />
+                            <CheckBox Name="LimelightFilterCheckbox" Content="Limelight Recordings" IsChecked="True" />
+                            <CheckBox Name="DsLogsFilterCheckbox" Content="Driver station logs" IsChecked="True" />
+                            <CheckBox Name="HootFilterCheckbox" Content="CTRE (hoot) logs" IsChecked="True" />
+                        </MenuFlyout>
+                    </DropDownButton.Flyout>
+                </DropDownButton>
             </StackPanel>
 
             <!-- Log List -->

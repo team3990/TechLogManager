@@ -204,25 +204,25 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void FilterButton_Click(object? sender, RoutedEventArgs e)
+    private async void FilterFlyout_Closed(object? sender, EventArgs e)
     {
         try
         {
             FilterButton.IsEnabled = false;
             Log("Filtering logs...");
             
-            var downloadRoborio = RoborioCheckbox.IsChecked ?? false;
-            var downloadLimelight = LimelightCheckbox.IsChecked ?? false;
-            var downloadDsLogs = DsLogsCheckbox.IsChecked ?? false;
-            var downloadHoot = HootCheckbox.IsChecked ?? false;
+            var downloadRoborio = RoborioFilterCheckbox.IsChecked ?? false;
+            var downloadLimelight = LimelightFilterCheckbox.IsChecked ?? false;
+            var downloadDsLogs = DsLogsFilterCheckbox.IsChecked ?? false;
+            var downloadHoot = HootFilterCheckbox.IsChecked ?? false;
             
             var visibleCount = 0;
             foreach (var entry in _logEntries)
             {
                 entry.IsVisible = (downloadRoborio && entry.Source == "RoboRio") ||
-                                 (downloadLimelight && entry.Source == "Limelight") ||
-                                 (downloadDsLogs && entry.Source == "DriverStation") ||
-                                 (downloadHoot && entry.Source == "Hoot");
+                                  (downloadLimelight && entry.Source == "Limelight") ||
+                                  (downloadDsLogs && entry.Source == "DriverStation") ||
+                                  (downloadHoot && entry.Source == "Hoot");
                 
                 if (entry.IsVisible)
                     visibleCount++;
