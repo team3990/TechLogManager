@@ -205,16 +205,20 @@ public partial class MainWindow : Window
             var downloadDsLogs = DsLogsFilterCheckbox.IsChecked ?? false;
             var downloadHoot = HootFilterCheckbox.IsChecked ?? false;
 
-            var visibleCount = 0;
-            foreach (var entry in _logEntries)
-            {
-                entry.IsVisible = (downloadRoborio && entry.Source == "RoboRio") ||
-                                  (downloadLimelight && entry.Source == "Limelight") ||
-                                  (downloadDsLogs && entry.Source == "DriverStation") ||
-                                  (downloadHoot && entry.Source == "Hoot");
+            _logEntries.Clear();
 
-                if (entry.IsVisible)
-                    visibleCount++;
+            var visibleCount = 0;
+            foreach (var entry in from entry in _allLogEntries
+                     let shouldShow =
+                         (downloadRoborio && entry.Source == LogSource.RoboRio) ||
+                         (downloadLimelight && entry.Source == LogSource.Limelight) ||
+                         (downloadDsLogs && entry.Source == LogSource.DriverStation) ||
+                         (downloadHoot && entry.Source == LogSource.Hoot)
+                     where shouldShow
+                     select entry)
+            {
+                _logEntries.Add(new LogEntryViewModel(entry));
+                visibleCount++;
             }
 
             Log($"Filtered to show {visibleCount} log(s)!");
@@ -336,7 +340,6 @@ public class LogEntryViewModel : ObservableObject
     public LogEntryViewModel(LogEntry entry)
     {
         Entry = entry;
-        IsVisible = true;
     }
 
     public string Name => Entry.Name;
@@ -355,12 +358,6 @@ public class LogEntryViewModel : ObservableObject
     }
 
     public bool IsDeleting
-    {
-        get;
-        set => SetProperty(ref field, value);
-    }
-
-    public bool IsVisible
     {
         get;
         set => SetProperty(ref field, value);

@@ -104,8 +104,7 @@
             <ListBox Grid.Row="4" Name="LogListBox" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="local:LogEntryViewModel">
-                        <Border BorderBrush="Gray" BorderThickness="1" Padding="7.2, 6.8, 7.2, 6.8" Margin="-5"
-                                CornerRadius="5" IsVisible="{Binding IsVisible}">
+                        <Border BorderBrush="Gray" BorderThickness="1" Padding="7.2, 6.8, 7.2, 6.8" Margin="-5" CornerRadius="5">
                             <Grid ColumnDefinitions="Auto,10,*,10,Auto,10,Auto">
                                 <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}" VerticalAlignment="Center" />
 
