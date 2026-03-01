@@ -49,10 +49,10 @@ namespace LimelightClasses
     public class RecordingDetail(string name, string limelightName) : IDisposable
     {
         private readonly HttpClient _client = new();
+        public readonly string Name = limelightName + "_" + name;
         public string Video { get; private set; } = name + ".avi";
         public string Manifest { get; private set; } = name + "_manifest.jsonl";
         public string Bootlog { get; private set; } = name + "_bootlog.txt.gz";
-        public readonly string Name = limelightName + "_" + name;
 
         public void Dispose()
         {

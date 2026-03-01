@@ -57,7 +57,8 @@ public static class HootProcessing
         return files.Select(file => new LogEntry(file.GetFileName()!, LogSource.Hoot, async (dest, action) =>
         {
             if (action.IsDownload())
-                await conn.DownloadFileScpAsync(file, dest.Combine("hoot").CreateDirectory().Combine(file.GetFileName()!));
+                await conn.DownloadFileScpAsync(file,
+                    dest.Combine("hoot").CreateDirectory().Combine(file.GetFileName()!));
             if (action.IsDelete())
                 await conn.RunCommandAsync($"rm -f {file}");
         })).OrderByDescending(e => e.Name).ToList();

@@ -1,6 +1,6 @@
-﻿using Avalonia.Controls;
+﻿using System.Collections.ObjectModel;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
-using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Raphdf201.FileUtils;
 using static TechLogManager.Utils;
@@ -9,11 +9,11 @@ namespace TechLogManager;
 
 public partial class MainWindow : Window
 {
+    private readonly List<LogEntry> _allLogEntries = [];
+    private readonly ObservableCollection<LogEntryViewModel> _logEntries = [];
+    private ClientManager? _clientManager;
     private string? _realDestFolder;
     private string? _selectedTeam;
-    private readonly ObservableCollection<LogEntryViewModel> _logEntries = [];
-    private readonly List<LogEntry> _allLogEntries = [];
-    private ClientManager? _clientManager;
 
     public MainWindow()
     {
@@ -22,9 +22,9 @@ public partial class MainWindow : Window
         var i = SettingsManager.Instance;
         SetFolderPathDate();
         TeamNumberTextBox.Text = i.DefaultTeamNumber;
-        
+
         LogListBox.ItemsSource = _logEntries;
-        
+
         Closing += (_, _) => DisposeClientManager();
     }
 
@@ -131,7 +131,6 @@ public partial class MainWindow : Window
             }
 
             if (downloadLimelight)
-            {
                 try
                 {
                     var entries = await LimelightProcessing.GetLogs(_clientManager);
@@ -141,10 +140,8 @@ public partial class MainWindow : Window
                 {
                     Log($"Error downloading Limelight logs: {ex.Message}");
                 }
-            }
-            
+
             if (downloadRoborio)
-            {
                 try
                 {
                     var entries = await RioProcessing.GetLogs(_clientManager);
@@ -154,10 +151,8 @@ public partial class MainWindow : Window
                 {
                     Log($"Error downloading RoboRIO logs: {ex.Message}");
                 }
-            }
-            
+
             if (downloadDsLogs)
-            {
                 try
                 {
                     var entries = DriverStationProcessing.GetLogs();
@@ -167,10 +162,8 @@ public partial class MainWindow : Window
                 {
                     Log($"Error downloading Driver Station logs: {ex.Message}");
                 }
-            }
-            
+
             if (downloadHoot)
-            {
                 try
                 {
                     var entries = await HootProcessing.ProcessLogs(_selectedTeam, _clientManager);
@@ -180,13 +173,9 @@ public partial class MainWindow : Window
                 {
                     Log($"Error downloading Hoot logs: {ex.Message}");
                 }
-            }
 
             // Populate the UI list
-            foreach (var entry in _allLogEntries)
-            {
-                _logEntries.Add(new LogEntryViewModel(entry));
-            }
+            foreach (var entry in _allLogEntries) _logEntries.Add(new LogEntryViewModel(entry));
 
             Log("");
             Log($"Found {_allLogEntries.Count} log(s)!");
@@ -210,12 +199,12 @@ public partial class MainWindow : Window
         {
             FilterButton.IsEnabled = false;
             Log("Filtering logs...");
-            
+
             var downloadRoborio = RoborioFilterCheckbox.IsChecked ?? false;
             var downloadLimelight = LimelightFilterCheckbox.IsChecked ?? false;
             var downloadDsLogs = DsLogsFilterCheckbox.IsChecked ?? false;
             var downloadHoot = HootFilterCheckbox.IsChecked ?? false;
-            
+
             var visibleCount = 0;
             foreach (var entry in _logEntries)
             {
@@ -223,11 +212,11 @@ public partial class MainWindow : Window
                                   (downloadLimelight && entry.Source == "Limelight") ||
                                   (downloadDsLogs && entry.Source == "DriverStation") ||
                                   (downloadHoot && entry.Source == "Hoot");
-                
+
                 if (entry.IsVisible)
                     visibleCount++;
             }
-            
+
             Log($"Filtered to show {visibleCount} log(s)!");
         }
         catch (Exception ex)
@@ -244,7 +233,7 @@ public partial class MainWindow : Window
     private async Task DownloadLog(LogEntryViewModel viewModel)
     {
         if (_realDestFolder == null) return;
-        
+
         try
         {
             viewModel.IsDownloading = true;
@@ -289,21 +278,15 @@ public partial class MainWindow : Window
     {
         if (_realDestFolder == null) return;
 
-        foreach (var entry in _logEntries.ToList())
-        {
-            await DownloadLog(entry);
-        }
-        
+        foreach (var entry in _logEntries.ToList()) await DownloadLog(entry);
+
         Log("All downloads completed!");
     }
 
     private async void DeleteAllButton_Click(object? sender, RoutedEventArgs e)
     {
-        foreach (var entry in _logEntries.ToList())
-        {
-            await DeleteLog(entry);
-        }
-        
+        foreach (var entry in _logEntries.ToList()) await DeleteLog(entry);
+
         Log("All deletes completed!");
     }
 
@@ -312,55 +295,37 @@ public partial class MainWindow : Window
         if (_realDestFolder == null) return;
 
         var selected = _logEntries.Where(x => x.IsSelected).ToList();
-        foreach (var entry in selected)
-        {
-            await DownloadLog(entry);
-        }
-        
+        foreach (var entry in selected) await DownloadLog(entry);
+
         Log($"Downloaded {selected.Count} selected log(s)!");
     }
 
     private async void DeleteSelectedButton_Click(object? sender, RoutedEventArgs e)
     {
         var selected = _logEntries.Where(x => x.IsSelected).ToList();
-        foreach (var entry in selected)
-        {
-            await DeleteLog(entry);
-        }
-        
+        foreach (var entry in selected) await DeleteLog(entry);
+
         Log($"Deleted {selected.Count} selected log(s)!");
     }
 
     private void SelectAllButton_Click(object? sender, RoutedEventArgs e)
     {
-        foreach (var entry in _logEntries)
-        {
-            entry.IsSelected = true;
-        }
+        foreach (var entry in _logEntries) entry.IsSelected = true;
     }
 
     private void DeselectAllButton_Click(object? sender, RoutedEventArgs e)
     {
-        foreach (var entry in _logEntries)
-        {
-            entry.IsSelected = false;
-        }
+        foreach (var entry in _logEntries) entry.IsSelected = false;
     }
 
     private void DownloadButton_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender is Button { DataContext: LogEntryViewModel viewModel })
-        {
-            _ = DownloadLog(viewModel);
-        }
+        if (sender is Button { DataContext: LogEntryViewModel viewModel }) _ = DownloadLog(viewModel);
     }
 
     private void DeleteButton_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender is Button { DataContext: LogEntryViewModel viewModel })
-        {
-            _ = DeleteLog(viewModel);
-        }
+        if (sender is Button { DataContext: LogEntryViewModel viewModel }) _ = DeleteLog(viewModel);
     }
 }
 

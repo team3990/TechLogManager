@@ -51,7 +51,7 @@ public static class RioProcessing
             string.Compare(File.GetName(a), File.GetName(b), StringComparison.OrdinalIgnoreCase));
 
         Log($"Found {files.Count} RoboRIO log file(s)");
-        
+
         return files.Select(file => new LogEntry(file.GetFileName()!, LogSource.RoboRio, async (dest, action) =>
             {
                 if (action.IsDownload())

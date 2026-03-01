@@ -16,6 +16,7 @@ public static class DriverStationProcessing
             File.Move(filesl[i], newfname);
             filesl[i] = newfname;
         }
+
         var files = filesl.AsEnumerable()
             .OrderByDescending(File.GetLastWriteTime)
             .Select(it => it.Replace(".dslog", "").Replace(".dsevents", ""))
@@ -27,7 +28,8 @@ public static class DriverStationProcessing
             {
                 if (action.IsDownload())
                 {
-                    File.Copy($"{file}.dsevents", dest.Combine("dslogs").CreateDirectory().Combine($"{fname}.dsevents"));
+                    File.Copy($"{file}.dsevents",
+                        dest.Combine("dslogs").CreateDirectory().Combine($"{fname}.dsevents"));
                     File.Copy($"{file}.dslog", dest.Combine("dslogs").CreateDirectory().Combine($"{fname}.dslog"));
                 }
 
@@ -36,6 +38,7 @@ public static class DriverStationProcessing
                     File.Delete(file + ".dslog");
                     File.Delete(file + ".dsevents");
                 }
+
                 return Task.CompletedTask;
             })).OrderBy(e => e.Name).ToList();
     }
