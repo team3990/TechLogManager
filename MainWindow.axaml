@@ -59,7 +59,7 @@
         </Grid>
 
         <!-- Right Panel: Log List View -->
-        <Grid Grid.Column="2" RowDefinitions="Auto,10,Auto,10,*">
+        <Grid Grid.Column="2" RowDefinitions="Auto,10,Auto,10,Auto,10,*">
             <!-- Settings Button -->
             <Button Name="SettingsButton"
                     HorizontalAlignment="Right"
@@ -100,8 +100,16 @@
                 </DropDownButton>
             </StackPanel>
 
+            <!-- Counts and Progress -->
+            <StackPanel Grid.Row="4" Spacing="4">
+                <TextBlock Name="LogCountTextBlock" Text="Visible logs: 0 / 0" FontWeight="Bold" />
+
+                <TextBlock Name="SharedProgressTextBlock" Text="Progress: 0/0 (100%)" FontSize="12" />
+                <ProgressBar Name="SharedProgressBar" Height="12" Minimum="0" Maximum="1" Value="0" />
+            </StackPanel>
+
             <!-- Log List -->
-            <ListBox Grid.Row="4" Name="LogListBox" ScrollViewer.HorizontalScrollBarVisibility="Auto">
+            <ListBox Grid.Row="6" Name="LogListBox" ScrollViewer.HorizontalScrollBarVisibility="Auto">
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="local:LogEntryViewModel">
                         <Border BorderBrush="Gray" BorderThickness="1" Padding="7.2, 6.8, 7.2, 6.8" Margin="-5" CornerRadius="5">

@@ -24,6 +24,8 @@ public partial class MainWindow : Window
         TeamNumberTextBox.Text = i.DefaultTeamNumber;
 
         LogListBox.ItemsSource = _logEntries;
+        UpdateLogCountDisplay();
+        SetProgress("Progress", 0, 0);
 
         Closing += (_, _) => DisposeClientManager();
     }
@@ -80,6 +82,30 @@ public partial class MainWindow : Window
         }
     }
 
+    private void UpdateLogCountDisplay()
+    {
+        LogCountTextBlock.Text = $"Visible logs: {_logEntries.Count} / {_allLogEntries.Count}";
+    }
+
+    private void SetProgress(string label, int completed, int total)
+    {
+        SharedProgressBar.Minimum = 0;
+        SharedProgressBar.Maximum = Math.Max(1, total);
+        SharedProgressBar.Value = Math.Min(completed, SharedProgressBar.Maximum);
+
+        var percent = total == 0 ? 100 : (int)Math.Round(completed * 100.0 / total);
+        SharedProgressTextBlock.Text = $"{label}: {completed}/{total} ({percent}%)";
+    }
+
+    private void RebuildVisibleLogEntries(IEnumerable<LogEntry> entries)
+    {
+        _logEntries.Clear();
+
+        foreach (var entry in entries) _logEntries.Add(new LogEntryViewModel(entry));
+
+        UpdateLogCountDisplay();
+    }
+
     private async void StartButton_Click(object? sender, RoutedEventArgs e)
     {
         if (string.IsNullOrEmpty(_selectedTeam))
@@ -116,6 +142,7 @@ public partial class MainWindow : Window
 
             _allLogEntries.Clear();
             _logEntries.Clear();
+            UpdateLogCountDisplay();
 
             _clientManager = new ClientManager(_selectedTeam);
 
@@ -175,7 +202,7 @@ public partial class MainWindow : Window
                 }
 
             // Populate the UI list
-            foreach (var entry in _allLogEntries) _logEntries.Add(new LogEntryViewModel(entry));
+            RebuildVisibleLogEntries(_allLogEntries);
 
             Log("");
             Log($"Found {_allLogEntries.Count} log(s)!");
@@ -205,23 +232,18 @@ public partial class MainWindow : Window
             var downloadDsLogs = DsLogsFilterCheckbox.IsChecked ?? false;
             var downloadHoot = HootFilterCheckbox.IsChecked ?? false;
 
-            _logEntries.Clear();
+            var filteredEntries = (from entry in _allLogEntries
+                let shouldShow =
+                    (downloadRoborio && entry.Source == LogSource.RoboRio) ||
+                    (downloadLimelight && entry.Source == LogSource.Limelight) ||
+                    (downloadDsLogs && entry.Source == LogSource.DriverStation) ||
+                    (downloadHoot && entry.Source == LogSource.Hoot)
+                where shouldShow
+                select entry).ToList();
 
-            var visibleCount = 0;
-            foreach (var entry in from entry in _allLogEntries
-                     let shouldShow =
-                         (downloadRoborio && entry.Source == LogSource.RoboRio) ||
-                         (downloadLimelight && entry.Source == LogSource.Limelight) ||
-                         (downloadDsLogs && entry.Source == LogSource.DriverStation) ||
-                         (downloadHoot && entry.Source == LogSource.Hoot)
-                     where shouldShow
-                     select entry)
-            {
-                _logEntries.Add(new LogEntryViewModel(entry));
-                visibleCount++;
-            }
+            RebuildVisibleLogEntries(filteredEntries);
 
-            Log($"Filtered to show {visibleCount} log(s)!");
+            Log($"Filtered to show {filteredEntries.Count} log(s)!");
         }
         catch (Exception ex)
         {
@@ -266,6 +288,7 @@ public partial class MainWindow : Window
             Log($"Deleted {viewModel.Name}");
             _logEntries.Remove(viewModel);
             _allLogEntries.Remove(viewModel.Entry);
+            UpdateLogCountDisplay();
         }
         catch (Exception ex)
         {
@@ -282,16 +305,34 @@ public partial class MainWindow : Window
     {
         if (_realDestFolder == null) return;
 
-        foreach (var entry in _logEntries.ToList()) await DownloadLog(entry);
+        var entries = _logEntries.ToList();
+        SetProgress("Download progress", 0, entries.Count);
 
-        Log("All downloads completed!");
+        var completed = 0;
+        foreach (var entry in entries)
+        {
+            await DownloadLog(entry);
+            completed++;
+            SetProgress("Download progress", completed, entries.Count);
+        }
+
+        Log($"All downloads completed! ({completed}/{entries.Count})");
     }
 
     private async void DeleteAllButton_Click(object? sender, RoutedEventArgs e)
     {
-        foreach (var entry in _logEntries.ToList()) await DeleteLog(entry);
+        var entries = _logEntries.ToList();
+        SetProgress("Delete progress", 0, entries.Count);
 
-        Log("All deletes completed!");
+        var completed = 0;
+        foreach (var entry in entries)
+        {
+            await DeleteLog(entry);
+            completed++;
+            SetProgress("Delete progress", completed, entries.Count);
+        }
+
+        Log($"All deletes completed! ({completed}/{entries.Count})");
     }
 
     private async void DownloadSelectedButton_Click(object? sender, RoutedEventArgs e)
@@ -299,17 +340,33 @@ public partial class MainWindow : Window
         if (_realDestFolder == null) return;
 
         var selected = _logEntries.Where(x => x.IsSelected).ToList();
-        foreach (var entry in selected) await DownloadLog(entry);
+        SetProgress("Download progress", 0, selected.Count);
 
-        Log($"Downloaded {selected.Count} selected log(s)!");
+        var completed = 0;
+        foreach (var entry in selected)
+        {
+            await DownloadLog(entry);
+            completed++;
+            SetProgress("Download progress", completed, selected.Count);
+        }
+
+        Log($"Downloaded {completed}/{selected.Count} selected log(s)!");
     }
 
     private async void DeleteSelectedButton_Click(object? sender, RoutedEventArgs e)
     {
         var selected = _logEntries.Where(x => x.IsSelected).ToList();
-        foreach (var entry in selected) await DeleteLog(entry);
+        SetProgress("Delete progress", 0, selected.Count);
 
-        Log($"Deleted {selected.Count} selected log(s)!");
+        var completed = 0;
+        foreach (var entry in selected)
+        {
+            await DeleteLog(entry);
+            completed++;
+            SetProgress("Delete progress", completed, selected.Count);
+        }
+
+        Log($"Deleted {completed}/{selected.Count} selected log(s)!");
     }
 
     private void SelectAllButton_Click(object? sender, RoutedEventArgs e)
