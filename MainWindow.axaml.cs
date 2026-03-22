@@ -128,7 +128,6 @@ public partial class MainWindow : Window
 
         try
         {
-            _realDestFolder.CreateDirectory();
             var downloadRoborio = RoborioCheckbox.IsChecked ?? false;
             var downloadLimelight = LimelightCheckbox.IsChecked ?? false;
             var downloadDsLogs = DsLogsCheckbox.IsChecked ?? false;
@@ -263,6 +262,7 @@ public partial class MainWindow : Window
     private async Task DownloadLog(LogEntryViewModel viewModel)
     {
         if (_realDestFolder == null) return;
+        _realDestFolder.CreateDirectory();
 
         try
         {
@@ -308,6 +308,7 @@ public partial class MainWindow : Window
     private async void DownloadAllButton_Click(object? sender, RoutedEventArgs e)
     {
         if (_realDestFolder == null) return;
+        _realDestFolder.CreateDirectory();
 
         var entries = _logEntries.ToList();
         SetProgress("Download progress", 0, entries.Count);
@@ -342,6 +343,7 @@ public partial class MainWindow : Window
     private async void DownloadSelectedButton_Click(object? sender, RoutedEventArgs e)
     {
         if (_realDestFolder == null) return;
+        _realDestFolder.CreateDirectory();
 
         var selected = _logEntries.Where(x => x.IsSelected).ToList();
         SetProgress("Download progress", 0, selected.Count);
@@ -394,14 +396,9 @@ public partial class MainWindow : Window
     }
 }
 
-public class LogEntryViewModel : ObservableObject
+public class LogEntryViewModel(LogEntry entry) : ObservableObject
 {
-    public readonly LogEntry Entry;
-
-    public LogEntryViewModel(LogEntry entry)
-    {
-        Entry = entry;
-    }
+    public readonly LogEntry Entry = entry;
 
     public string Name => Entry.Name;
     public string Source => Entry.Source.ToString();
