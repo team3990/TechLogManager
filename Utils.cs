@@ -74,6 +74,11 @@ public static class Utils
             return action is Action.Delete or Action.DownloadAndDelete;
         }
     }
+
+    extension(string str)
+    {
+        internal string WrapPath() => str.Replace("\\", "\\\u200B").Replace("/", "/\u200B");
+    }
 }
 
 public enum Action

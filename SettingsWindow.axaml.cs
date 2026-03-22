@@ -6,27 +6,27 @@ namespace TechLogManager;
 
 public partial class SettingsWindow : Window
 {
+    private SettingsManager? _settings;
     private string? _repoFolder;
 
     public SettingsWindow()
     {
         InitializeComponent();
-        LoadSettings();
     }
 
-    private void LoadSettings()
+    public void LoadSettings(SettingsManager settings)
     {
-        var i = SettingsManager.Instance;
-        DefaultTeamTextBox.Text = i.DefaultTeamNumber;
-        RepoFolderTextBox.Text = i.RepositoryLocation;
+        _settings = settings;
+        DefaultTeamTextBox.Text = _settings.DefaultTeamNumber;
+        RepoFolderTextBox.Text = _settings.RepositoryLocation;
     }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        var i = SettingsManager.Instance;
-        if (DefaultTeamTextBox.Text != null) i.DefaultTeamNumber = DefaultTeamTextBox.Text;
-        if (RepoFolderTextBox.Text != null) i.RepositoryLocation = RepoFolderTextBox.Text;
-        i.Save();
+        if (_settings == null) Console.WriteLine("No settings to save to");
+        if (DefaultTeamTextBox.Text != null) _settings?.DefaultTeamNumber = DefaultTeamTextBox.Text;
+        if (RepoFolderTextBox.Text != null) _settings?.RepositoryLocation = RepoFolderTextBox.Text;
+        _settings?.Save();
         Close();
     }
 

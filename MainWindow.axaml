@@ -39,6 +39,7 @@
                          HorizontalAlignment="Left"
                          TextAlignment="Center"
                          TextChanged="DestinationFolderTextBox_TextChanged" />
+                <TextBlock Name="DestinationFolderText" Width="180" Text="" TextWrapping="Wrap" FontSize="14" /> 
             </StackPanel>
 
             <!-- What to Download -->
@@ -47,8 +48,8 @@
                 <StackPanel HorizontalAlignment="Left" Margin="0,10,0,0">
                     <CheckBox Name="RoborioCheckbox" Content="RoboRIO Logs" IsChecked="True" />
                     <CheckBox Name="LimelightCheckbox" Content="Limelight Recordings" IsChecked="True" />
-                    <CheckBox Name="DsLogsCheckbox" Content="Driver station logs" IsChecked="False" />
-                    <CheckBox Name="HootCheckbox" Content="CTRE (hoot) logs" IsChecked="False" />
+                    <CheckBox Name="DsLogsCheckbox" Content="Driver station logs" IsChecked="True" />
+                    <CheckBox Name="HootCheckbox" Content="CTRE (hoot) logs" IsChecked="True" />
                 </StackPanel>
             </StackPanel>
 
@@ -122,9 +123,9 @@
                                 </StackPanel>
 
                                 <Button Grid.Column="4" Content="Download" Click="DownloadButton_Click"
-                                        IsEnabled="{Binding !IsDownloading}" Width="100" />
+                                        IsEnabled="{CompiledBinding !IsDownloading}" Width="100" />
                                 <Button Grid.Column="6" Content="Delete" Click="DeleteButton_Click" Foreground="Red"
-                                        IsEnabled="{Binding !IsDeleting}" Width="100" />
+                                        IsEnabled="{CompiledBinding !IsDeleting}" Width="100" />
                             </Grid>
                         </Border>
                     </DataTemplate>

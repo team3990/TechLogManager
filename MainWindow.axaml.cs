@@ -11,6 +11,7 @@ public partial class MainWindow : Window
 {
     private readonly List<LogEntry> _allLogEntries = [];
     private readonly ObservableCollection<LogEntryViewModel> _logEntries = [];
+    private readonly SettingsManager _settings = SettingsManager.Load();
     private ClientManager? _clientManager;
     private string? _realDestFolder;
     private string? _selectedTeam;
@@ -19,9 +20,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        var i = SettingsManager.Instance;
         SetFolderPathDate();
-        TeamNumberTextBox.Text = i.DefaultTeamNumber;
+        TeamNumberTextBox.Text = _settings.DefaultTeamNumber;
 
         LogListBox.ItemsSource = _logEntries;
         UpdateLogCountDisplay();
@@ -39,8 +39,8 @@ public partial class MainWindow : Window
     private void SetFolderPathDate()
     {
         var date = DateTime.Now.ToString("yyyy-MM-dd-HH'h'mm");
-        var i = SettingsManager.Instance;
-        _realDestFolder = Path.Combine(i.RepositoryLocation, date);
+        _realDestFolder = Path.Combine(_settings.RepositoryLocation, date);
+        DestinationFolderText.Text = _realDestFolder.WrapPath();
         DestinationFolderTextBox.Text = date;
     }
 
@@ -48,7 +48,10 @@ public partial class MainWindow : Window
     {
         DisposeClientManager();
         var settingsWindow = new SettingsWindow();
+        settingsWindow.LoadSettings(_settings);
         await settingsWindow.ShowDialog(this);
+        SetFolderPathDate();
+        TeamNumberTextBox.Text = _settings.DefaultTeamNumber;
     }
 
     private void TeamNumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -74,7 +77,8 @@ public partial class MainWindow : Window
 
         try
         {
-            _realDestFolder = Path.Combine(SettingsManager.Instance.RepositoryLocation, folderEnd);
+            _realDestFolder = Path.Combine(_settings.RepositoryLocation, folderEnd);
+            DestinationFolderText.Text = _realDestFolder.WrapPath();
         }
         catch
         {
