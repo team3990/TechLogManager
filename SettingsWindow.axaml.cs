@@ -6,8 +6,8 @@ namespace TechLogManager;
 
 public partial class SettingsWindow : Window
 {
-    private SettingsManager? _settings;
     private string? _repoFolder;
+    private SettingsManager? _settings;
 
     public SettingsWindow()
     {

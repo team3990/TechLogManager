@@ -59,7 +59,7 @@ public class ClientManager : IDisposable
                 if (!_sshClient.IsConnected)
                     throw new Exception("SSH client is not connected");
 
-                var result = _sshClient.RunCommand(command);
+                SshCommand result = _sshClient.RunCommand(command);
 
                 return result.ExitStatus != 0
                     ? throw new Exception($"Command failed with exit code {result.ExitStatus}: {result.Error}")
@@ -79,7 +79,7 @@ public class ClientManager : IDisposable
         return results;
     }
 
-    public async Task<string> DownloadFileScpAsync(string remotePath, string localPath)
+    public async Task<string> DownloadScpAsync(string remotePath, string localPath)
     {
         return await Task.Run(() =>
         {
@@ -101,16 +101,21 @@ public class ClientManager : IDisposable
     public async Task<List<string>> DownloadFilesScpAsync(IEnumerable<(string remotePath, string localPath)> files)
     {
         var results = new List<string>();
-        foreach (var (remotePath, localPath) in files) results.Add(await DownloadFileScpAsync(remotePath, localPath));
+        foreach (var (remotePath, localPath) in files) results.Add(await DownloadScpAsync(remotePath, localPath));
         return results;
     }
 
     public async Task DownloadFileHttpAsync(string url, string outputPath)
     {
-        var response = await _httpClient.GetAsync(url);
+        HttpResponseMessage response = await _httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
 
-        await using var fileStream = File.Create(outputPath);
+        await using FileStream fileStream = File.Create(outputPath);
         await response.Content.CopyToAsync(fileStream);
+    }
+
+    public async Task<HttpResponseMessage> PerformRequest(HttpRequestMessage request)
+    {
+        return await _httpClient.SendAsync(request);
     }
 }

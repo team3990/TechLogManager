@@ -56,7 +56,7 @@ public static class RioProcessing
             {
                 if (action.IsDownload())
                 {
-                    var result = await conn.DownloadFileScpAsync(file, dest
+                    var result = await conn.DownloadScpAsync(file, dest
                         .Combine("wpilog").CreateDirectory().Combine(file.GetFileName()!));
                     Log(result);
                 }
@@ -68,5 +68,17 @@ public static class RioProcessing
                 }
             }))
             .OrderByDescending(e => e.Name).ToList();
+    }
+
+    public static async Task DownloadAll(string dest, ClientManager conn)
+    {
+        dest = dest.Combine("wpilog").CreateDirectory();
+        await conn.DownloadScpAsync("/U/logs/*", dest);
+        await conn.DownloadScpAsync("/home/lvuser/logs/*", dest);
+    }
+
+    public static async Task DeleteAll(ClientManager conn)
+    {
+        await conn.RunCommandsAsync("rm -rf /U/logs/*", "rm -rf /home/lvuser/logs/*");
     }
 }

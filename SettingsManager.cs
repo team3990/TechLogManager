@@ -37,7 +37,7 @@ public class SettingsManager
             var json = JsonSerializer.Deserialize<SettingsManager>(File.ReadAllText(SettingsPath));
             return json ?? throw new Exception("Deserialization returned null");
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Console.WriteLine("Failed to read settings file, creating new");
             Console.WriteLine(e);

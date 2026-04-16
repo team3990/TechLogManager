@@ -1,3 +1,4 @@
+using LimelightClasses;
 using Raphdf201.FileUtils;
 using static TechLogManager.Utils;
 
@@ -58,5 +59,36 @@ public static class LimelightProcessing
                     await rec.Delete();
             });
         }).ToList().Reversed();
+    }
+
+    public static async Task DownloadAll(string dest, ClientManager conn)
+    {
+        var limelightsJson = await conn.RunCommandAsync("cat /home/lvuser/limelights.json");
+        var limelights = ParseJsonStringList(limelightsJson);
+        if (limelights == null) return;
+
+        foreach (var llname in limelights)
+        foreach (RecordingDetail rec in await LimelightUtils.GetRecordingsAsync(llname))
+        {
+            if (!string.IsNullOrEmpty(rec.Video))
+                await conn.DownloadFileHttpAsync(rec.Video, dest
+                    .Combine(llname + "-" + rec.Name).CreateDirectory().Combine("video.avi"));
+            if (!string.IsNullOrEmpty(rec.Manifest))
+                await conn.DownloadFileHttpAsync(rec.Manifest, dest
+                    .Combine(llname + "-" + rec.Name).CreateDirectory().Combine("manifest.jsonl"));
+            if (!string.IsNullOrEmpty(rec.Bootlog))
+                await conn.DownloadFileHttpAsync(rec.Bootlog, dest
+                    .Combine(llname + "-" + rec.Name).CreateDirectory().Combine("bootlog.txt.gz"));
+        }
+    }
+
+    public static async Task DeleteAll(ClientManager conn)
+    {
+        var limelightsJson = await conn.RunCommandAsync("cat /home/lvuser/limelights.json");
+        var limelights = ParseJsonStringList(limelightsJson);
+        if (limelights == null) return;
+
+        foreach (var limelight in limelights)
+            await LimelightUtils.DeleteAllVideosAsync(limelight);
     }
 }

@@ -5,10 +5,12 @@ namespace TechLogManager;
 
 public static class DriverStationProcessing
 {
+    private const string LogLoc = @"C:\Users\Public\Documents\FRC\Log Files\DSLogs";
+
     public static List<LogEntry> GetLogs()
     {
         Log("Processing driver station logs...");
-        var filesl = Directory.EnumerateFiles(@"C:\Users\Public\Documents\FRC\Log Files\DSLogs").ToArray();
+        var filesl = Directory.GetFiles(LogLoc);
         for (var i = 0; i < filesl.Length; i++)
         {
             if (!filesl[i].Contains("..")) continue;
@@ -41,5 +43,38 @@ public static class DriverStationProcessing
 
                 return Task.CompletedTask;
             })).OrderBy(e => e.Name).ToList();
+    }
+
+    public static void DownloadAll(string dest)
+    {
+        dest = dest.Combine("dslogs").CreateDirectory();
+        var files = Directory.EnumerateFiles(LogLoc);
+        foreach (var file in files)
+        {
+            try
+            {
+                File.Move(file, dest);
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+    }
+
+    public static void DeleteAll()
+    {
+        var files = Directory.EnumerateFiles(LogLoc);
+        foreach (var file in files)
+        {
+            try
+            {
+                File.Delete(file);
+            }
+            catch
+            {
+                // ignored
+            }
+        }
     }
 }

@@ -57,10 +57,30 @@ public static class HootProcessing
         return files.Select(file => new LogEntry(file.GetFileName()!, LogSource.Hoot, async (dest, action) =>
         {
             if (action.IsDownload())
-                await conn.DownloadFileScpAsync(file,
+                await conn.DownloadScpAsync(file,
                     dest.Combine("hoot").CreateDirectory().Combine(file.GetFileName()!));
             if (action.IsDelete())
                 await conn.RunCommandAsync($"rm -f {file}");
         })).OrderByDescending(e => e.Name).ToList();
+    }
+
+    public static async Task DownloadAll(string dest, ClientManager conn)
+    {
+        var res = await conn.RunCommandsAsync(
+            "find /home/lvuser/logs -type f -name \"*.hoot\" -delete",
+            "find /U/logs -type f -name \"*.hoot\" -delete");
+        List<string> files = [];
+        foreach (var result in res)
+            files.AddRange(result.Split("\n"));
+        dest = dest.Combine("hoot").CreateDirectory();
+        foreach (var file in files)
+            await conn.DownloadScpAsync(file, dest);
+    }
+
+    public static async Task DeleteAll(ClientManager conn)
+    {
+        await conn.RunCommandsAsync(
+            "find /home/lvuser/logs -type f -name \"*.hoot\" -delete",
+            "find /U/logs -type f -name \"*.hoot\" -delete");
     }
 }
