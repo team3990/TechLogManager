@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 
@@ -17,14 +17,14 @@ public partial class SettingsWindow : Window
     public void LoadSettings(SettingsManager settings)
     {
         _settings = settings;
-        DefaultTeamTextBox.Text = _settings.DefaultTeamNumber;
+        RobotHostTextBox.Text = _settings.RobotHost;
         RepoFolderTextBox.Text = _settings.RepositoryLocation;
     }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
         if (_settings == null) Console.WriteLine("No settings to save to");
-        if (DefaultTeamTextBox.Text != null) _settings?.DefaultTeamNumber = DefaultTeamTextBox.Text;
+        if (RobotHostTextBox.Text != null) _settings?.RobotHost = RobotHostTextBox.Text.Trim();
         if (RepoFolderTextBox.Text != null) _settings?.RepositoryLocation = RepoFolderTextBox.Text;
         _settings?.Save();
         Close();

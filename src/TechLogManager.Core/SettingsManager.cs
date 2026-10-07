@@ -1,10 +1,11 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
 namespace TechLogManager;
 
+/// <summary>User settings, shared by the GUI and the CLI.</summary>
 public class SettingsManager
 {
-    private static readonly string SettingsPath = Path.Combine(
+    public static readonly string SettingsPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "TechLogManager",
         "settings.json"
@@ -12,7 +13,7 @@ public class SettingsManager
 
     private static readonly JsonSerializerOptions PrettyJson = new() { WriteIndented = true };
 
-    public string DefaultTeamNumber { get; set; } = "";
+    public string RobotHost { get; set; } = RobotConnection.DefaultHost;
     public string RepositoryLocation { get; set; } = "";
 
     public void Save()
@@ -28,7 +29,7 @@ public class SettingsManager
     {
         if (!File.Exists(SettingsPath))
         {
-            Console.WriteLine("Settings file not found, creating new");
+            Console.Error.WriteLine("Settings file not found, creating new");
             return new SettingsManager();
         }
 
@@ -39,8 +40,8 @@ public class SettingsManager
         }
         catch (Exception e)
         {
-            Console.WriteLine("Failed to read settings file, creating new");
-            Console.WriteLine(e);
+            Console.Error.WriteLine("Failed to read settings file, creating new");
+            Console.Error.WriteLine(e);
             return new SettingsManager();
         }
     }

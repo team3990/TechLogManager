@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -12,28 +12,27 @@ public partial class MainWindow : Window
     private readonly List<LogEntry> _allLogEntries = [];
     private readonly ObservableCollection<LogEntryViewModel> _logEntries = [];
     private readonly SettingsManager _settings = SettingsManager.Load();
-    private ClientManager? _clientManager;
+    private LogManager? _logManager;
     private string? _realDestFolder;
-    private string? _selectedTeam;
 
     public MainWindow()
     {
         InitializeComponent();
 
         SetFolderPathDate();
-        TeamNumberTextBox.Text = _settings.DefaultTeamNumber;
+        RobotHostTextBox.Text = _settings.RobotHost;
 
         LogListBox.ItemsSource = _logEntries;
         UpdateLogCountDisplay();
         SetProgress("Progress", 0, 0);
 
-        Closing += (_, _) => DisposeClientManager();
+        Closing += (_, _) => DisposeLogManager();
     }
 
-    private void DisposeClientManager()
+    private void DisposeLogManager()
     {
-        _clientManager?.Dispose();
-        _clientManager = null;
+        _logManager?.Dispose();
+        _logManager = null;
     }
 
     private void SetFolderPathDate()
@@ -46,19 +45,12 @@ public partial class MainWindow : Window
 
     private async void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
-        DisposeClientManager();
+        DisposeLogManager();
         var settingsWindow = new SettingsWindow();
         settingsWindow.LoadSettings(_settings);
         await settingsWindow.ShowDialog(this);
         SetFolderPathDate();
-        TeamNumberTextBox.Text = _settings.DefaultTeamNumber;
-    }
-
-    private void TeamNumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        var teamNumber = TeamNumberTextBox.Text?.Trim();
-
-        _selectedTeam = ushort.TryParse(teamNumber, out _) ? teamNumber : null;
+        RobotHostTextBox.Text = _settings.RobotHost;
     }
 
     private void DestinationFolderTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -110,17 +102,27 @@ public partial class MainWindow : Window
         UpdateLogCountDisplay();
     }
 
+    private static List<LogSource> CheckedSources(CheckBox wpilog, CheckBox hoot, CheckBox limelight)
+    {
+        var sources = new List<LogSource>();
+        if (wpilog.IsChecked ?? false) sources.Add(LogSource.Wpilog);
+        if (hoot.IsChecked ?? false) sources.Add(LogSource.Hoot);
+        if (limelight.IsChecked ?? false) sources.Add(LogSource.Limelight);
+        return sources;
+    }
+
     private async void StartButton_Click(object? sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrEmpty(_selectedTeam))
-        {
-            await this.ShowMessageDialog("Error", "Please select a team first!");
-            return;
-        }
-
         if (_realDestFolder == null)
         {
             await this.ShowMessageDialog("Error", "Please enter a valid folder name");
+            return;
+        }
+
+        var sources = CheckedSources(WpilogCheckbox, HootCheckbox, LimelightCheckbox);
+        if (sources.Count == 0)
+        {
+            await this.ShowMessageDialog("Error", "Please select at least one log type!");
             return;
         }
 
@@ -128,89 +130,37 @@ public partial class MainWindow : Window
 
         try
         {
-            var downloadRoborio = RoborioCheckbox.IsChecked ?? false;
-            var downloadLimelight = LimelightCheckbox.IsChecked ?? false;
-            var downloadDsLogs = DsLogsCheckbox.IsChecked ?? false;
-            var downloadHoot = HootCheckbox.IsChecked ?? false;
-
-            if (!downloadRoborio && !downloadLimelight && !downloadDsLogs && !downloadHoot)
-            {
-                await this.ShowMessageDialog("Error", "Please select at least one log type!");
-                return;
-            }
-
-            Log("Starting log discovery...");
-            Log($"Team: {_selectedTeam}");
-            Log("");
-
             _allLogEntries.Clear();
             _logEntries.Clear();
             UpdateLogCountDisplay();
 
-            _clientManager = new ClientManager(_selectedTeam);
+            DisposeLogManager();
+            _logManager = new LogManager(RobotHostTextBox.Text ?? "", Log);
+
+            Log($"Starting log discovery on {_logManager.Host}...");
 
             try
             {
-                await _clientManager.ConnectAsync(
-                    downloadRoborio || downloadLimelight || downloadHoot,
-                    downloadRoborio || downloadHoot);
+                await _logManager.ConnectAsync();
             }
             catch (Exception exception)
             {
-                await this.ShowMessageDialog("Error", $"Could not connect to roborio : {exception.Message}");
+                Log(exception.Message);
+                DisposeLogManager();
+                await this.ShowMessageDialog("Error", exception.Message);
+                return;
             }
 
-            if (downloadLimelight)
-                try
-                {
-                    var entries = await LimelightProcessing.GetLogs(_clientManager);
-                    _allLogEntries.AddRange(entries);
-                }
-                catch (Exception ex)
-                {
-                    Log($"Error downloading Limelight logs: {ex.Message}");
-                }
+            var result = await _logManager.ListAsync(sources);
+            _allLogEntries.AddRange(result.Entries);
 
-            if (downloadRoborio)
-                try
-                {
-                    var entries = await RioProcessing.GetLogs(_clientManager);
-                    _allLogEntries.AddRange(entries);
-                }
-                catch (Exception ex)
-                {
-                    Log($"Error downloading RoboRIO logs: {ex.Message}");
-                }
-
-            if (downloadDsLogs)
-                try
-                {
-                    var entries = DriverStationProcessing.GetLogs();
-                    _allLogEntries.AddRange(entries);
-                }
-                catch (Exception ex)
-                {
-                    Log($"Error downloading Driver Station logs: {ex.Message}");
-                }
-
-            if (downloadHoot)
-                try
-                {
-                    var entries = await HootProcessing.ProcessLogs(_selectedTeam, _clientManager);
-                    _allLogEntries.AddRange(entries);
-                }
-                catch (Exception ex)
-                {
-                    Log($"Error downloading Hoot logs: {ex.Message}");
-                }
-
-            // Populate the UI list
             RebuildVisibleLogEntries(_allLogEntries);
 
             Log("");
             Log($"Found {_allLogEntries.Count} log(s)!");
 
-            FilterButton.IsEnabled = true;
+            if (result.Errors.Count > 0)
+                await this.ShowMessageDialog("Warning", string.Join("\n", result.Errors));
         }
         catch (Exception ex)
         {
@@ -230,19 +180,8 @@ public partial class MainWindow : Window
             FilterButton.IsEnabled = false;
             Log("Filtering logs...");
 
-            var downloadRoborio = RoborioFilterCheckbox.IsChecked ?? false;
-            var downloadLimelight = LimelightFilterCheckbox.IsChecked ?? false;
-            var downloadDsLogs = DsLogsFilterCheckbox.IsChecked ?? false;
-            var downloadHoot = HootFilterCheckbox.IsChecked ?? false;
-
-            var filteredEntries = (from entry in _allLogEntries
-                let shouldShow =
-                    (downloadRoborio && entry.Source == LogSource.RoboRio) ||
-                    (downloadLimelight && entry.Source == LogSource.Limelight) ||
-                    (downloadDsLogs && entry.Source == LogSource.DriverStation) ||
-                    (downloadHoot && entry.Source == LogSource.Hoot)
-                where shouldShow
-                select entry).ToList();
+            var sources = CheckedSources(WpilogFilterCheckbox, HootFilterCheckbox, LimelightFilterCheckbox);
+            var filteredEntries = _allLogEntries.Where(entry => sources.Contains(entry.Source)).ToList();
 
             RebuildVisibleLogEntries(filteredEntries);
 
@@ -261,15 +200,12 @@ public partial class MainWindow : Window
 
     private async Task DownloadLog(LogEntryViewModel viewModel)
     {
-        if (_realDestFolder == null) return;
-        _realDestFolder.CreateDirectory();
+        if (_realDestFolder == null || _logManager == null) return;
 
         try
         {
             viewModel.IsDownloading = true;
-            Log($"Downloading {viewModel.Name}...");
-            await viewModel.Entry.ActionCallback(_realDestFolder, Action.Download);
-            Log($"Downloaded {viewModel.Name}");
+            await _logManager.DownloadAsync(viewModel.Entry, _realDestFolder);
         }
         catch (Exception ex)
         {
@@ -284,12 +220,12 @@ public partial class MainWindow : Window
 
     private async Task DeleteLog(LogEntryViewModel viewModel)
     {
+        if (_logManager == null) return;
+
         try
         {
             viewModel.IsDeleting = true;
-            Log($"Deleting {viewModel.Name}...");
-            await viewModel.Entry.ActionCallback(_realDestFolder ?? "", Action.Delete);
-            Log($"Deleted {viewModel.Name}");
+            await _logManager.DeleteAsync(viewModel.Entry);
             _logEntries.Remove(viewModel);
             _allLogEntries.Remove(viewModel.Entry);
             UpdateLogCountDisplay();
@@ -307,9 +243,6 @@ public partial class MainWindow : Window
 
     private async void DownloadAllButton_Click(object? sender, RoutedEventArgs e)
     {
-        if (_realDestFolder == null) return;
-        _realDestFolder.CreateDirectory();
-
         var entries = _logEntries.ToList();
         SetProgress("Download progress", 0, entries.Count);
 
@@ -342,9 +275,6 @@ public partial class MainWindow : Window
 
     private async void DownloadSelectedButton_Click(object? sender, RoutedEventArgs e)
     {
-        if (_realDestFolder == null) return;
-        _realDestFolder.CreateDirectory();
-
         var selected = _logEntries.Where(x => x.IsSelected).ToList();
         SetProgress("Download progress", 0, selected.Count);
 
@@ -401,7 +331,15 @@ public class LogEntryViewModel(LogEntry entry) : ObservableObject
     public readonly LogEntry Entry = entry;
 
     public string Name => Entry.Name;
-    public string Source => Entry.Source.ToString();
+
+    /// <summary>"Source · local date · size · match", only with the parts that are known.</summary>
+    public string Details => string.Join(" · ", new[]
+    {
+        Entry.Source.ToString(),
+        Entry.Date?.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss"),
+        Entry.Size is { } size ? $"{size / 1024.0 / 1024.0:0.0} MB" : null,
+        Entry.Match is { } match ? $"{match.Event} {match.Type} {match.Number}" : null
+    }.Where(part => part != null));
 
     public bool IsSelected
     {

@@ -1,4 +1,4 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="TechLogManager.SettingsWindow"
         Title="Settings"
@@ -16,9 +16,9 @@
                 <TextBlock Text="General Settings" FontSize="18" FontWeight="Bold" />
                 <Separator />
 
-                <!-- Default Team Number -->
-                <TextBlock Text="Default Team Number:" Margin="0,15,0,5" FontWeight="SemiBold" />
-                <TextBox Name="DefaultTeamTextBox"
+                <!-- Default robot address -->
+                <TextBlock Text="Default robot address (robot.local, or an IP):" Margin="0,15,0,5" FontWeight="SemiBold" />
+                <TextBox Name="RobotHostTextBox"
                          Width="200"
                          HorizontalAlignment="Left" />
 

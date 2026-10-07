@@ -1,4 +1,3 @@
-﻿using System.Text.Json;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Layout;
@@ -8,16 +7,6 @@ namespace TechLogManager;
 
 public static class Utils
 {
-    public static List<string>? ParseJsonStringList(string json)
-    {
-        return JsonSerializer.Deserialize<List<string>>(json);
-    }
-
-    internal static string GetRioHostname(string teamNumber)
-    {
-        return $"roboRIO-{teamNumber}-FRC.local";
-    }
-
     public static async Task ShowMessageDialog(this Window window, string title, string message)
     {
         var dialog = new Window
@@ -50,40 +39,13 @@ public static class Utils
         await dialog.ShowDialog(window);
     }
 
-    public static List<T> Reversed<T>(this List<T> list)
-    {
-        var copy = new List<T>(list);
-        copy.Reverse();
-        return copy;
-    }
-
     public static void Log(string message)
     {
         Console.WriteLine(message);
     }
 
-    extension(Action action)
-    {
-        internal bool IsDownload()
-        {
-            return action is Action.Download or Action.DownloadAndDelete;
-        }
-
-        internal bool IsDelete()
-        {
-            return action is Action.Delete or Action.DownloadAndDelete;
-        }
-    }
-
     extension(string str)
     {
-        internal string WrapPath() => str.Replace("\\", "\\\u200B").Replace("/", "/\u200B");
+        internal string WrapPath() => str.Replace("\\", "\\​").Replace("/", "/​");
     }
-}
-
-public enum Action
-{
-    DownloadAndDelete,
-    Download,
-    Delete
 }

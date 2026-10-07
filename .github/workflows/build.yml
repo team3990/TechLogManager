@@ -21,10 +21,19 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-      - name: Build
-        run: dotnet publish -c Release -r ${{ matrix.runtime }}
-      - name: Upload artifact
+      - name: Test
+        run: dotnet test TechLogManager.slnx
+      - name: Publish GUI
+        run: dotnet publish src/TechLogManager -c Release -r ${{ matrix.runtime }} -o publish/gui
+      - name: Publish CLI
+        run: dotnet publish src/TechLogManager.Cli -c Release -r ${{ matrix.runtime }} -o publish/cli
+      - name: Upload GUI
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.runtime }}-build
-          path: bin/Release/net10.0/${{ matrix.runtime }}/publish
+          name: ${{ matrix.runtime }}-gui
+          path: publish/gui
+      - name: Upload CLI
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.runtime }}-cli
+          path: publish/cli

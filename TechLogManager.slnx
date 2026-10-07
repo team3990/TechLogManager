@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TechLogManager.Cli/TechLogManager.Cli.csproj" />
+    <Project Path="src/TechLogManager.Core/TechLogManager.Core.csproj" />
+    <Project Path="src/TechLogManager/TechLogManager.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TechLogManager.Core.Tests/TechLogManager.Core.Tests.csproj" />
+  </Folder>
+</Solution>
